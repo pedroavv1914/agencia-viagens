@@ -367,9 +367,6 @@ nav {
     stroke: #fff;
 }
 
-
-
-
 footer {
     padding: 100px;
     background-color: #3BACD9;
@@ -399,14 +396,14 @@ footer .navbar-brand {
 
     .nav-link {
         margin-right: 5px;
-        font-size: 19px;
+        font-size: 15px;
     }
 
     .card1,
     .card2,
     .card3 {
-        width: 90%;
-        height: 250px;
+        width: 100%;
+        height: 300px;
     }
 
     .card__content1,
@@ -434,8 +431,8 @@ footer .navbar-brand {
     }
 
     .card-int1 {
-        width: 90%;
-        height: auto;
+        width: 80%;
+        height: 470px;
     }
 
     .card-int1 > h1 {
@@ -449,10 +446,11 @@ footer .navbar-brand {
     .int-btn {
         padding: 10px 30px;
         font-size: 15px;
+        color: white;
     }
 
     .task {
-        width: 90%;
+        width: 110%;
     }
 
     footer {
