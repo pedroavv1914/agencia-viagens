@@ -54,7 +54,6 @@ const PacotesNacionais: React.FC = () => {
 
   // Carrossel: 5 pacotes por vez, efeito suave
   const [startIndex, setStartIndex] = useState(0);
-  const itemsPerPage = 5;
   const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
 
   function getWindowedPacotes() {
