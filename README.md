@@ -1,53 +1,54 @@
-# 🌍 Palazzo Travel
+# React + TypeScript + Vite
 
-O Palazzo Agência de Viagens foi criado com um objetivo claro: tornar o processo de marcar viagens fácil, especialmente para pessoas com pouca familiaridade com tecnologia.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 🎯 Objetivo do Site
+Currently, two official plugins are available:
 
-Este é um site de viagens intuitivo criado para ajudar usuários a explorar e escolher seus próximos destinos com facilidade e praticidade. A plataforma oferece uma experiência fluida e agradável, com foco em usabilidade e design acessível, permitindo que qualquer pessoa diferentes idades de viajantes ocasionais a aventureiros experientes e encontre lugares incríveis para visitar.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## 💻 Tecnologias Utilizadas
+## Expanding the ESLint configuration
 
-- *HTML5*
-- *CSS3*
-- *Bootstrap 5*
-- *GitHub Actions*
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-O site é totalmente *responsivo*, adaptando-se a diferentes tamanhos de tela e proporcionando uma boa experiência tanto em dispositivos móveis quanto em desktops.
+```js
+export default tseslint.config({
+  extends: [
+    // Remove ...tseslint.configs.recommended and replace with this
+    ...tseslint.configs.recommendedTypeChecked,
+    // Alternatively, use this for stricter rules
+    ...tseslint.configs.strictTypeChecked,
+    // Optionally, add this for stylistic rules
+    ...tseslint.configs.stylisticTypeChecked,
+  ],
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
+```
 
-## 🔗 URL de Acesso
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-Site hospedado via Vercel:  
-👉 [https://agencia-viagens-iota.vercel.app](https://agencia-viagens-iota.vercel.app)
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## 🧪 Instruções de Uso e Instalação
-
-Para rodar o projeto localmente:
-
-1. Clone o repositório:
-   bash
-   git clone [https://github.com/pedroavv1914/repositorio.git](https://github.com/pedroavv1914/agencia-viagens)
-   cd repositorio
-   
-
-2. Abra o arquivo index.html em um navegador ou utilize uma extensão como *Live Server* (VS Code) para melhor visualização.
-
-> Não é necessário back-end ou instalação de dependências. O site é totalmente estático.
-
-## ⚙ Descrição do Pipeline Configurado (CI/CD)
-
-O projeto utiliza *GitHub Actions* para integração contínua. O pipeline está definido em .github/workflows/jekyll-docker.yml com os seguintes comportamentos:
-
-- *Gatilhos*:
-  - push e pull_request para a branch main.
-
-- *Execução*:
-  - Ação de checkout do repositório.
-  - Build do site usando container Docker jekyll/builder:latest, garantindo que o site estático pode ser gerado corretamente via jekyll build.
-
-## 👥 Integrantes do Grupo
-
-- *Paulo Henrique Nobre Cagnoto* — RA: 2404453  
-- *João Pedro Medeiros de Castro* — RA: 2404751  
-- *Murilo Batista da Silva* — RA: 2401604  
-- *Pedro Oliveira Ribeiro dos Santos* — RA: 2401723  
+export default tseslint.config({
+  plugins: {
+    // Add the react-x and react-dom plugins
+    'react-x': reactX,
+    'react-dom': reactDom,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended typescript rules
+    ...reactX.configs['recommended-typescript'].rules,
+    ...reactDom.configs.recommended.rules,
+  },
+})
+```

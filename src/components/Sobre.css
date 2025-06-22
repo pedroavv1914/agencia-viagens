@@ -1,0 +1,73 @@
+.sobre {
+  background: #fff;
+  padding: 3rem 0 2.5rem 0;
+}
+.sobre h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.sobre p {
+  max-width: 700px;
+  margin: 0 auto 1.2rem auto;
+  color: #333;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.sobre-destaque {
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+  background: #f7fbff;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem 1.1rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,153,255,0.07);
+}
+.sobre-destaque p {
+  color: #333;
+  font-size: 1.13rem;
+  margin: 0;
+  text-align: center;
+}
+
+.sobre-vantagens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem 2.5rem;
+  justify-items: center;
+  align-items: stretch;
+  margin: 0 auto;
+  max-width: 900px;
+}
+.sobre-vantagem-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,153,255,0.08);
+  padding: 1.15rem 1.1rem 1.1rem 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+  max-width: 350px;
+  width: 100%;
+  transition: box-shadow 0.2s;
+}
+.sobre-vantagem-card:hover {
+  box-shadow: 0 4px 18px rgba(0,153,255,0.15);
+}
+.sobre-vantagem-icone {
+  font-size: 2.1rem;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+  color: #0099ff;
+}
+.sobre-vantagem-card strong {
+  font-size: 1.09rem;
+  color: #0099ff;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.sobre-vantagem-card p {
+  color: #444;
+  font-size: 1rem;
+  margin: 0;
+}

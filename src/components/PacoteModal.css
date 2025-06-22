@@ -1,0 +1,98 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+  animation: modalShow 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+.modal-info {
+  width: 100%;
+  margin: 1rem 0 1.5rem 0;
+  text-align: left;
+}
+.modal-info h4 {
+  margin-bottom: 0.5rem;
+  color: #0099ff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.modal-info ul {
+  padding-left: 1.2rem;
+  margin: 0;
+}
+.modal-info li {
+  margin-bottom: 0.3rem;
+  font-size: 0.97rem;
+}
+.modal-comprar-btn {
+  margin-top: 1.5rem;
+  background: linear-gradient(90deg, #0099ff 60%, #00c2ff 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.8rem 2.2rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,153,255,0.13);
+  transition: background 0.2s, transform 0.15s;
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+}
+.modal-comprar-btn:hover {
+  background: linear-gradient(90deg, #00c2ff 0%, #0099ff 100%);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 24px rgba(0,153,255,0.18);
+}
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.modal-close:hover {
+  color: #005bea;
+}
+.modal-img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  max-height: 180px;
+  object-fit: cover;
+}
+.modal-preco {
+  color: #005bea;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.7rem;
+}
+.modal-desc {
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}

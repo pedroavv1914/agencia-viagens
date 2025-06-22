@@ -1,0 +1,45 @@
+.contato {
+  background: #f7fbff;
+  padding: 3rem 0 2.5rem 0;
+}
+.contato h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.contato-form {
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,153,255,0.07);
+}
+.form-group label {
+  font-weight: 500;
+  color: #0099ff;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #cce7ff;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 0.2rem;
+  background: #f7fbff;
+  resize: none;
+}
+.contato-info {
+  text-align: center;
+  color: #333;
+  font-size: 1.04rem;
+  margin-top: 1.2rem;
+}
+.contato-info p {
+  margin: 0.4rem 0;
+}
