@@ -38,6 +38,7 @@ You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-re
 import reactX from 'eslint-plugin-react-x'
 import reactDom from 'eslint-plugin-react-dom'
 
+<<<<<<< HEAD
 export default tseslint.config({
   plugins: {
     // Add the react-x and react-dom plugins
@@ -52,3 +53,29 @@ export default tseslint.config({
   },
 })
 ```
+=======
+## 🧪 Instruções de Uso e Instalação
+
+Para rodar o projeto localmente:
+
+1. Clone o repositório:
+   bash
+   git clone [https://github.com/pedroavv1914/repositorio.git](https://github.com/pedroavv1914/agencia-viagens)
+   cd repositorio
+   
+
+2. Abra o arquivo index.html em um navegador ou utilize uma extensão como *Live Server* (VS Code) para melhor visualização.
+
+> Não é necessário back-end ou instalação de dependências. O site é totalmente estático.
+
+## ⚙ Descrição do Pipeline Configurado (CI/CD)
+
+O projeto utiliza *GitHub Actions* para integração contínua. O pipeline está definido em .github/workflows/jekyll-docker.yml com os seguintes comportamentos:
+
+- *Gatilhos*:
+  - push e pull_request para a branch main.
+
+- *Execução*:
+  - Ação de checkout do repositório.
+  - Build do site usando container Docker jekyll/builder:latest, garantindo que o site estático pode ser gerado corretamente via jekyll build.
+>>>>>>> 8c1514d5468e344ef0c9e804acf45ee85c9691fd
