@@ -12,7 +12,7 @@ import cancunImg from '../assets/images/cancun.jpg';
 import romaImg from '../assets/images/roma.jpg';
 import barcelonaImg from '../assets/images/barcelona-carrossel.jpg';
 
-const pacotes = [
+const initialPacotes = [
   { nome: 'Paris', imagem: parisImg, preco: 'R$ 5.800', descricao: 'Encante-se com a Torre Eiffel, museus e gastronomia francesa.' },
   { nome: 'Orlando', imagem: orlandoImg, preco: 'R$ 7.200', descricao: 'Diversão garantida nos parques temáticos mais famosos do mundo.' },
   { nome: 'Buenos Aires', imagem: buenosAiresImg, preco: 'R$ 4.100', descricao: 'Tango, cultura e culinária argentina em uma cidade vibrante.' },
@@ -29,13 +29,17 @@ const pacotes = [
 ];
 
 import { useNavigate } from 'react-router-dom';
+import { getPackages } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const PacotesInternacionais: React.FC = () => {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
-  const [pacoteSelecionado, setPacoteSelecionado] = useState<typeof pacotes[0] | null>(null);
+  const [pacoteSelecionado, setPacoteSelecionado] = useState<typeof initialPacotes[0] | null>(null);
 
   const [windowSize, setWindowSize] = React.useState(window.innerWidth <= 700 ? 1 : 5);
+  const [pacotes, setPacotes] = useState(initialPacotes);
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,7 +49,28 @@ const PacotesInternacionais: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleOpenModal = (pacote: typeof pacotes[0]) => {
+  useEffect(() => {
+    async function fetchData() {
+      if (!token) return;
+      try {
+        const data = await getPackages('internacional', token);
+        if (Array.isArray(data) && data.length) {
+          const normalized = data.map((p) => ({
+            nome: p.nome,
+            preco: p.preco,
+            descricao: p.descricao,
+            imagem: p.imagem,
+          }));
+          setPacotes(normalized);
+        }
+      } catch (_) {
+        // mantém dados locais
+      }
+    }
+    fetchData();
+  }, [token]);
+
+  const handleOpenModal = (pacote: typeof initialPacotes[0]) => {
     setPacoteSelecionado(pacote);
     setModalOpen(true);
   };
@@ -150,4 +175,4 @@ const PacotesInternacionais: React.FC = () => {
 };
 
 export default PacotesInternacionais;
-export const pacotesInternacionais = pacotes;
+export const pacotesInternacionais = initialPacotes;
