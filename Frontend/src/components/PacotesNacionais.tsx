@@ -11,7 +11,7 @@ import arraialImg from '../assets/images/arraial-do-cabo.jpg';
 import gramadoImg from '../assets/images/gramado.jpg';
 import salvadorImg from '../assets/images/salvador.jpeg';
 
-const pacotes = [
+const initialPacotes = [
   { nome: 'Fernando de Noronha', imagem: noronhaImg, preco: 'R$ 3.200', descricao: 'Descubra as belezas naturais de Noronha com tudo incluso.' },
   { nome: 'Campos do Jordão', imagem: camposImg, preco: 'R$ 1.800', descricao: 'Aproveite o friozinho e o charme da serra paulista.' },
   { nome: 'Jalapão', imagem: jalapaoImg, preco: 'R$ 2.200', descricao: 'Ecoturismo, cachoeiras e aventura no coração do Brasil.' },
@@ -27,11 +27,15 @@ const pacotes = [
 ];
 
 import { useNavigate } from 'react-router-dom';
+import { getPackages } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const PacotesNacionais: React.FC = () => {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
-  const [pacoteSelecionado, setPacoteSelecionado] = useState<typeof pacotes[0] | null>(null);
+  const [pacoteSelecionado, setPacoteSelecionado] = useState<typeof initialPacotes[0] | null>(null);
+  const [pacotes, setPacotes] = useState(initialPacotes);
 
   const [windowSize, setWindowSize] = React.useState(window.innerWidth <= 700 ? 1 : 5);
 
@@ -43,7 +47,29 @@ const PacotesNacionais: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleOpenModal = (pacote: typeof pacotes[0]) => {
+  useEffect(() => {
+    async function fetchData() {
+      if (!token) return;
+      try {
+        const data = await getPackages('nacional', token);
+        if (Array.isArray(data) && data.length) {
+          // normaliza formato
+          const normalized = data.map((p) => ({
+            nome: p.nome,
+            preco: p.preco,
+            descricao: p.descricao,
+            imagem: p.imagem,
+          }));
+          setPacotes(normalized);
+        }
+      } catch (_) {
+        // mantém dados locais
+      }
+    }
+    fetchData();
+  }, [token]);
+
+  const handleOpenModal = (pacote: typeof initialPacotes[0]) => {
     setPacoteSelecionado(pacote);
     setModalOpen(true);
   };
@@ -146,4 +172,4 @@ const PacotesNacionais: React.FC = () => {
 };
 
 export default PacotesNacionais;
-export const pacotesNacionais = pacotes;
+export const pacotesNacionais = initialPacotes;
