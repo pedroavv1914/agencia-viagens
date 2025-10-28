@@ -1,0 +1,35 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    container_name: agencia_viagens_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-agencia_viagens}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  api:
+    build:
+      context: ./Backend
+    container_name: agencia_viagens_api
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@palazzo.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      USER_EMAIL: ${USER_EMAIL:-user@palazzo.com}
+      USER_PASSWORD: ${USER_PASSWORD:-user123}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-agencia_viagens}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+volumes:
+  pgdata:
