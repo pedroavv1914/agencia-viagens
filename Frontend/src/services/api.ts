@@ -34,6 +34,16 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return res.json();
 }
 
+export async function register(email: string, password: string): Promise<LoginResponse> {
+  const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error('Falha no cadastro');
+  return res.json();
+}
+
 export async function getPackages(tipo: 'nacional' | 'internacional', token: string): Promise<TravelPackage[]> {
   const url = `${API_BASE_URL}/packages?tipo=${encodeURIComponent(tipo)}`;
   const res = await fetch(url, {
