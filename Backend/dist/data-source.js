@@ -8,6 +8,7 @@ require("reflect-metadata");
 const typeorm_1 = require("typeorm");
 const dotenv_1 = __importDefault(require("dotenv"));
 const TravelPackage_1 = require("./entity/TravelPackage");
+const User_1 = require("./entity/User");
 dotenv_1.default.config();
 const host = process.env.DB_HOST || 'localhost';
 const port = parseInt(process.env.DB_PORT || '5432', 10);
@@ -23,5 +24,5 @@ exports.AppDataSource = new typeorm_1.DataSource({
     database,
     synchronize: true,
     logging: false,
-    entities: [TravelPackage_1.TravelPackage],
+    entities: [TravelPackage_1.TravelPackage, User_1.User],
 });
