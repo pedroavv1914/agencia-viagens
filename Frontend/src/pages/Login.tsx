@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { login as apiLogin } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
@@ -42,6 +42,9 @@ const Login: React.FC = () => {
         <button type="submit" className="cta-btn" disabled={loading}>
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
+        <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
+          Não tem conta? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none' }}>Criar conta</Link>
+        </p>
       </form>
     </section>
   );
