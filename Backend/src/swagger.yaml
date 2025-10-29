@@ -33,6 +33,25 @@ paths:
                     type: string
         '401':
           description: Credenciais inválidas
+  /auth/register:
+    post:
+      summary: Cadastro de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Token e role do usuário criado
+        '409':
+          description: Email já cadastrado
   /packages:
     get:
       summary: Listar pacotes
