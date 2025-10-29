@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const data_source_1 = require("../data-source");
+const User_1 = require("../entity/User");
 const router = (0, express_1.Router)();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@palazzo.com';
@@ -27,15 +29,40 @@ router.post('/login', async (req, res) => {
         role = 'user';
         expectedPassword = USER_PASSWORD;
     }
-    if (!role) {
-        return res.status(401).json({ message: 'Credenciais inválidas' });
+    // Tenta credenciais de ambiente (admin/user demo)
+    if (role) {
+        const isHash = expectedPassword.startsWith('$2');
+        const ok = isHash ? await bcryptjs_1.default.compare(password, expectedPassword) : password === expectedPassword;
+        if (!ok) {
+            return res.status(401).json({ message: 'Credenciais inválidas' });
+        }
+        const token = jsonwebtoken_1.default.sign({ email, role }, JWT_SECRET, { expiresIn: '1d' });
+        return res.json({ token, role });
     }
-    const isHash = expectedPassword.startsWith('$2');
-    const ok = isHash ? await bcryptjs_1.default.compare(password, expectedPassword) : password === expectedPassword;
-    if (!ok) {
+    // Senão, tenta autenticar usuário do banco
+    const userRepo = data_source_1.AppDataSource.getRepository(User_1.User);
+    const user = await userRepo.findOne({ where: { email } });
+    if (!user)
         return res.status(401).json({ message: 'Credenciais inválidas' });
+    const ok = await bcryptjs_1.default.compare(password, user.passwordHash);
+    if (!ok)
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+    const token = jsonwebtoken_1.default.sign({ email, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: user.role });
+});
+router.post('/register', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email e senha são obrigatórios' });
     }
-    const token = jsonwebtoken_1.default.sign({ email, role }, JWT_SECRET, { expiresIn: '1d' });
-    return res.json({ token, role });
+    const userRepo = data_source_1.AppDataSource.getRepository(User_1.User);
+    const existing = await userRepo.findOne({ where: { email } });
+    if (existing)
+        return res.status(409).json({ message: 'Email já cadastrado' });
+    const passwordHash = await bcryptjs_1.default.hash(password, 10);
+    const created = userRepo.create({ email, passwordHash, role: 'user' });
+    const saved = await userRepo.save(created);
+    const token = jsonwebtoken_1.default.sign({ email: saved.email, role: saved.role }, JWT_SECRET, { expiresIn: '1d' });
+    return res.status(201).json({ token, role: saved.role });
 });
 exports.default = router;
