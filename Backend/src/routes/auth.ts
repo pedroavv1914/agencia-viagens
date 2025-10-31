@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AppDataSource } from '../data-source';
 import { User } from '../entity/User';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -64,6 +65,15 @@ router.post('/register', async (req, res) => {
   const saved = await userRepo.save(created);
   const token = jwt.sign({ email: saved.email, role: saved.role }, JWT_SECRET, { expiresIn: '1d' });
   return res.status(201).json({ token, role: saved.role });
+});
+
+router.get('/me', requireAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Não autenticado' });
+  }
+  
+  const { email, role } = req.user;
+  return res.json({ email, role });
 });
 
 export default router;
