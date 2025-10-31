@@ -115,6 +115,15 @@ export async function getUserInfo(token: string): Promise<UserInfo> {
   return res.json();
 }
 
+export async function refreshToken(token: string): Promise<LoginResponse> {
+  const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+  });
+  if (!res.ok) throw new Error('Falha ao atualizar token');
+  return res.json();
+}
+
 // Admin: listar usuários
 export async function getUsers(token: string): Promise<AdminUser[]> {
   const res = await fetch(`${API_BASE_URL}/admin/users`, {
