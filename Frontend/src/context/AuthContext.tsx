@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { UserRole } from '../services/api';
+import { refreshToken } from '../services/api';
 
 interface AuthContextValue {
   token: string | null;
@@ -26,6 +27,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (role) localStorage.setItem('auth_role', role);
     else localStorage.removeItem('auth_role');
   }, [role]);
+
+  // Sincroniza role/token com o backend caso tenha mudado (ex.: promoção para admin)
+  useEffect(() => {
+    let active = true;
+    async function sync() {
+      if (!token) return;
+      try {
+        const res = await refreshToken(token);
+        if (!active) return;
+        if (res.role && res.role !== role) {
+          setRole(res.role);
+        }
+        if (res.token && res.token !== token) {
+          setToken(res.token);
+        }
+      } catch {
+        // Se falhar, mantém estado atual
+      }
+    }
+    sync();
+    return () => { active = false; };
+  }, [token]);
 
   const value = useMemo(() => ({
     token,
