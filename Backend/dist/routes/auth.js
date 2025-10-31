@@ -8,6 +8,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const data_source_1 = require("../data-source");
 const User_1 = require("../entity/User");
+const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@palazzo.com';
@@ -64,5 +65,12 @@ router.post('/register', async (req, res) => {
     const saved = await userRepo.save(created);
     const token = jsonwebtoken_1.default.sign({ email: saved.email, role: saved.role }, JWT_SECRET, { expiresIn: '1d' });
     return res.status(201).json({ token, role: saved.role });
+});
+router.get('/me', auth_1.requireAuth, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'Não autenticado' });
+    }
+    const { email, role } = req.user;
+    return res.json({ email, role });
 });
 exports.default = router;
