@@ -11,6 +11,7 @@ const data_source_1 = require("./data-source");
 const db_1 = require("./utils/db");
 const auth_1 = __importDefault(require("./routes/auth"));
 const packages_1 = __importDefault(require("./routes/packages"));
+const adminUsers_1 = __importDefault(require("./routes/adminUsers"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const yamljs_1 = __importDefault(require("yamljs"));
 dotenv_1.default.config();
@@ -23,6 +24,7 @@ app.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.defaul
 // Routes
 app.use('/auth', auth_1.default);
 app.use('/packages', packages_1.default);
+app.use('/admin/users', adminUsers_1.default);
 const port = parseInt(process.env.PORT || '3000', 10);
 (0, db_1.ensureDatabaseExists)()
     .then(() => data_source_1.AppDataSource.initialize())
