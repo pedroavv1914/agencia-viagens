@@ -102,7 +102,11 @@ const UserMenu: React.FC = () => {
         </div>
         <div className="user-info">
           <span className="user-email">{userInfo.email}</span>
-          <span className="user-role">{getRoleLabel(userInfo.role)}</span>
+          {userInfo.role === 'admin' ? (
+            <span className="admin-badge" title="Administrador">Admin</span>
+          ) : (
+            <span className="user-role">{getRoleLabel(userInfo.role)}</span>
+          )}
         </div>
         <svg 
           className={`chevron ${menuOpen ? 'open' : ''}`} 
@@ -122,7 +126,11 @@ const UserMenu: React.FC = () => {
             </div>
             <div>
               <div className="user-email-large">{userInfo.email}</div>
-              <div className="user-role-large">{getRoleLabel(userInfo.role)}</div>
+              {userInfo.role === 'admin' ? (
+                <span className="admin-badge" title="Administrador">Admin</span>
+              ) : (
+                <div className="user-role-large">{getRoleLabel(userInfo.role)}</div>
+              )}
             </div>
           </div>
           
