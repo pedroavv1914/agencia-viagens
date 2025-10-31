@@ -20,7 +20,8 @@ const Register: React.FC = () => {
       login(res.token, res.role);
       navigate('/');
     } catch (err) {
-      setError('Falha no cadastro ou email já utilizado');
+      const message = err instanceof Error ? err.message : 'Falha no cadastro';
+      setError(message);
     } finally {
       setLoading(false);
     }
