@@ -6,6 +6,7 @@ import { AppDataSource } from './data-source';
 import { ensureDatabaseExists } from './utils/db';
 import authRoutes from './routes/auth';
 import packageRoutes from './routes/packages';
+import adminUserRoutes from './routes/adminUsers';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
@@ -22,6 +23,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Routes
 app.use('/auth', authRoutes);
 app.use('/packages', packageRoutes);
+app.use('/admin/users', adminUserRoutes);
 
 const port = parseInt(process.env.PORT || '3000', 10);
 
