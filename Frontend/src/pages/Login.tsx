@@ -20,7 +20,8 @@ const Login: React.FC = () => {
       login(res.token, res.role);
       navigate('/');
     } catch (err) {
-      setError('Credenciais inválidas ou erro no servidor');
+      const message = err instanceof Error ? err.message : 'Falha no login';
+      setError(message);
     } finally {
       setLoading(false);
     }
