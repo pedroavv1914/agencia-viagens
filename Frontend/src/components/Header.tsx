@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import './Header.css';
+import { useAuth } from '../hooks/useAuth';
+import UserMenu from './UserMenu';
 
 const Header: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [closing, setClosing] = useState(false);
 
@@ -49,10 +52,15 @@ const Header: React.FC = () => {
             <li><a href="#pacotes">Pacotes Nacionais</a></li>
             <li><a href="#pacotes-internacionais">Pacotes Internacionais</a></li>
             <li><a href="#depoimentos">Depoimentos</a></li>
-            <li><a href="#contato">Contato</a></li>
           </ul>
         </nav>
-        <a href="#contato" className="cta-btn nav-desktop">Fale Conosco</a>
+        <div className="header-actions">
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <a href="#contato" className="cta-btn nav-desktop">Fale Conosco</a>
+          )}
+        </div>
         {/* Menu lateral (drawer) */}
         {menuOpen && (
           <>
@@ -65,9 +73,14 @@ const Header: React.FC = () => {
                 <li><a href="#pacotes" onClick={handleCloseMenu}>Pacotes Nacionais</a></li>
                 <li><a href="#pacotes-internacionais" onClick={handleCloseMenu}>Pacotes Internacionais</a></li>
                 <li><a href="#depoimentos" onClick={handleCloseMenu}>Depoimentos</a></li>
-                <li><a href="#contato" onClick={handleCloseMenu}>Contato</a></li>
               </ul>
-              <a href="#contato" className="cta-btn" style={{ marginTop: 24 }} onClick={handleCloseMenu}>Fale Conosco</a>
+              {isAuthenticated ? (
+                <div style={{ padding: '16px', borderTop: '1px solid #eee' }}>
+                  <UserMenu />
+                </div>
+              ) : (
+                <a href="#contato" className="cta-btn" style={{ marginTop: 24 }} onClick={handleCloseMenu}>Fale Conosco</a>
+              )}
             </nav>
           </>
         )}
