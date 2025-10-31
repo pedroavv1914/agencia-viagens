@@ -76,4 +76,33 @@ router.get('/me', requireAuth, async (req, res) => {
   return res.json({ email, role });
 });
 
+// Reemite um token sincronizando a role atual do usuário no banco
+router.post('/refresh', requireAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Não autenticado' });
+  }
+
+  const { email } = req.user;
+  const userRepo = AppDataSource.getRepository(User);
+  const user = await userRepo.findOne({ where: { email } });
+
+  // Se o usuário existe no banco, emite token com a role atual
+  if (user) {
+    const token = jwt.sign({ email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: user.role });
+  }
+
+  // Fallback para contas de ambiente
+  if (email === ADMIN_EMAIL) {
+    const token = jwt.sign({ email, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: 'admin' });
+  }
+  if (email === USER_EMAIL) {
+    const token = jwt.sign({ email, role: 'user' }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: 'user' });
+  }
+
+  return res.status(404).json({ message: 'Usuário não encontrado' });
+});
+
 export default router;
