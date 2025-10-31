@@ -241,3 +241,15 @@
 .cta-btn {
   margin-left: 2rem;
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  margin-left: 2rem;
+}
+
+@media (max-width: 900px) {
+  .header-actions {
+    margin-left: 0;
+  }
+}
