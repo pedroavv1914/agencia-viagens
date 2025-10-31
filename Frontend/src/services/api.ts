@@ -5,6 +5,18 @@ export interface LoginResponse {
   role?: UserRole;
 }
 
+export interface UserInfo {
+  email: string;
+  role: UserRole;
+  name?: string;
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  role: UserRole;
+}
+
 export interface TravelPackage {
   id?: number;
   nome: string;
@@ -30,7 +42,14 @@ export async function login(email: string, password: string): Promise<LoginRespo
     headers: getAuthHeaders(),
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error('Falha no login');
+  if (!res.ok) {
+    let message = 'Falha no login';
+    try {
+      const err = await res.json();
+      if (err && typeof err.message === 'string') message = err.message;
+    } catch {}
+    throw new Error(message);
+  }
   return res.json();
 }
 
@@ -40,7 +59,14 @@ export async function register(email: string, password: string): Promise<LoginRe
     headers: getAuthHeaders(),
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error('Falha no cadastro');
+  if (!res.ok) {
+    let message = 'Falha no cadastro';
+    try {
+      const err = await res.json();
+      if (err && typeof err.message === 'string') message = err.message;
+    } catch {}
+    throw new Error(message);
+  }
   return res.json();
 }
 
@@ -79,4 +105,32 @@ export async function deletePackage(id: number, token: string): Promise<void> {
     headers: getAuthHeaders(token),
   });
   if (!res.ok) throw new Error('Falha ao remover pacote');
+}
+
+export async function getUserInfo(token: string): Promise<UserInfo> {
+  const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    headers: getAuthHeaders(token),
+  });
+  if (!res.ok) throw new Error('Falha ao obter informações do usuário');
+  return res.json();
+}
+
+// Admin: listar usuários
+export async function getUsers(token: string): Promise<AdminUser[]> {
+  const res = await fetch(`${API_BASE_URL}/admin/users`, {
+    headers: getAuthHeaders(token),
+  });
+  if (!res.ok) throw new Error('Falha ao carregar usuários');
+  return res.json();
+}
+
+// Admin: atualizar role de um usuário
+export async function updateUserRole(id: number, role: UserRole, token: string): Promise<AdminUser> {
+  const res = await fetch(`${API_BASE_URL}/admin/users/${id}/role`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify({ role }),
+  });
+  if (!res.ok) throw new Error('Falha ao atualizar role');
+  return res.json();
 }
