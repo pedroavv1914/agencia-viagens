@@ -1,0 +1,106 @@
+/* Página de Administração de Pacotes */
+
+.admin-page {
+  padding: 1.5rem 0 2.5rem 0; /* topo igual ao espaçamento lateral do .container */
+}
+
+.admin-content {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* mantém o título central na tela */
+  margin-bottom: 1.2rem;
+  min-height: 64px; /* garante barra de cabeçalho com altura consistente */
+}
+
+.admin-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.admin-header .cta-btn {
+  position: absolute;
+  left: 0; /* alinhado à esquerda da página (respeitando padding da .container) */
+}
+
+.back-btn {
+  background: linear-gradient(90deg, #7f8c8d, #95a5a6);
+  color: white;
+  border: none;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.06s ease, filter 0.2s ease;
+}
+.back-btn:hover {
+  filter: brightness(1.05);
+}
+.back-btn:active {
+  transform: translateY(1px);
+}
+
+.admin-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.6rem 0 1.2rem 0;
+}
+
+.segmented-btn {
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #e6f2ff;
+  background: #f7fbff;
+  color: #333;
+  cursor: pointer;
+  font-weight: 600;
+}
+.segmented-btn.active {
+  background: linear-gradient(90deg, #1677ff, #69b1ff);
+  color: #fff;
+  border-color: transparent;
+}
+
+.admin-form {
+  border: 1px solid #eef6ff;
+}
+
+.admin-form-title {
+  text-align: center;
+  margin: 0 0 1.2rem 0;
+}
+
+.admin-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 6px;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.15);
+  border-color: #69b1ff !important;
+}
+
+.admin-form-actions {
+  margin-top: 1.2rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 720px) {
+  .admin-content { max-width: 92vw; }
+  .admin-header { justify-content: center; }
+  .admin-header .cta-btn { left: 0; }
+}
