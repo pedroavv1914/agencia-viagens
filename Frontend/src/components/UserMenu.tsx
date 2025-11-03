@@ -92,6 +92,10 @@ const UserMenu: React.FC = () => {
     return 'Usuário';
   };
 
+  // Em dev, garantimos exibição de Master por email configurado
+  const MASTER_EMAIL = (import.meta.env.VITE_MASTER_EMAIL as string | undefined)?.toLowerCase();
+  const displayRole = userInfo.email.toLowerCase() === MASTER_EMAIL ? 'master' : userInfo.role;
+
   return (
     <div className="user-menu" ref={menuRef}>
       <button 
@@ -104,12 +108,12 @@ const UserMenu: React.FC = () => {
         </div>
         <div className="user-info">
           <span className="user-email">{userInfo.email}</span>
-          {userInfo.role === 'master' ? (
+          {displayRole === 'master' ? (
             <span className="master-badge" title="Master">Master</span>
-          ) : userInfo.role === 'admin' ? (
+          ) : displayRole === 'admin' ? (
             <span className="admin-badge" title="Administrador">Admin</span>
           ) : (
-            <span className="user-role">{getRoleLabel(userInfo.role)}</span>
+            <span className="user-role">{getRoleLabel(displayRole)}</span>
           )}
         </div>
         <svg 
@@ -130,12 +134,12 @@ const UserMenu: React.FC = () => {
             </div>
             <div>
               <div className="user-email-large">{userInfo.email}</div>
-              {userInfo.role === 'master' ? (
+              {displayRole === 'master' ? (
                 <span className="master-badge" title="Master">Master</span>
-              ) : userInfo.role === 'admin' ? (
+              ) : displayRole === 'admin' ? (
                 <span className="admin-badge" title="Administrador">Admin</span>
               ) : (
-                <div className="user-role-large">{getRoleLabel(userInfo.role)}</div>
+                <div className="user-role-large">{getRoleLabel(displayRole)}</div>
               )}
             </div>
           </div>
@@ -143,7 +147,7 @@ const UserMenu: React.FC = () => {
           <div className="user-menu-divider"></div>
           
           <div className="user-menu-items">
-            {(userInfo.role === 'admin' || userInfo.role === 'master') && (
+            {(displayRole === 'admin' || displayRole === 'master') && (
               <a href="/admin" className="user-menu-item">
                 <svg width="16" height="16" viewBox="0 0 16 16">
                   <path d="M8 1l2.5 5h5.5l-4.5 3.5 1.5 5.5-4.5-3.5-4.5 3.5 1.5-5.5-4.5-3.5h5.5z" fill="currentColor"/>
@@ -151,7 +155,7 @@ const UserMenu: React.FC = () => {
                 Painel Admin
               </a>
             )}
-            {userInfo.role === 'master' && (
+            {displayRole === 'master' && (
               <a href="/admin/users" className="user-menu-item">
                 <svg width="16" height="16" viewBox="0 0 16 16">
                   <path d="M8 9a3 3 0 100-6 3 3 0 000 6zm-6 6c0-3 3-5 6-5s6 2 6 5H2z" fill="currentColor"/>

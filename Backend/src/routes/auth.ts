@@ -57,8 +57,10 @@ router.post('/login', loginLimiter, async (req, res) => {
   if (!user) return res.status(401).json({ message: 'Credenciais inválidas' });
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ message: 'Credenciais inválidas' });
-  const token = jwt.sign({ email, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-  return res.json({ token, role: user.role });
+  // Override: MASTER_EMAIL sempre recebe role master, mesmo se existir no banco
+  const finalRole: 'admin' | 'user' | 'master' = email === MASTER_EMAIL ? 'master' : user.role;
+  const token = jwt.sign({ email, role: finalRole }, JWT_SECRET, { expiresIn: '1d' });
+  return res.json({ token, role: finalRole });
 });
 
 router.post('/register', async (req, res) => {
@@ -93,6 +95,11 @@ router.post('/refresh', requireAuth, async (req, res) => {
 
   const { email } = req.user;
   const userRepo = AppDataSource.getRepository(User);
+  // Override: MASTER_EMAIL sempre recebe role master
+  if (email === MASTER_EMAIL) {
+    const token = jwt.sign({ email, role: 'master' }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: 'master' });
+  }
   const user = await userRepo.findOne({ where: { email } });
 
   // Se o usuário existe no banco, emite token com a role atual

@@ -46,9 +46,13 @@ const AdminUsuarios: React.FC = () => {
 
   const adminCount = useMemo(() => users.filter(u => u.role === 'admin').length, [users]);
   const userCount = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
+  const MASTER_EMAIL = (import.meta.env.VITE_MASTER_EMAIL as string | undefined)?.toLowerCase();
+  const displayRoleOf = (u: AdminUser) => (u.email.toLowerCase() === MASTER_EMAIL ? 'master' : u.role);
+  const adminCountDisplay = useMemo(() => users.filter(u => displayRoleOf(u) === 'admin').length, [users]);
+  const userCountDisplay = useMemo(() => users.filter(u => displayRoleOf(u) === 'user').length, [users]);
   const filtered = useMemo(() => {
     if (filter === 'todos') return users;
-    return users.filter(u => u.role === filter);
+    return users.filter(u => displayRoleOf(u) === filter);
   }, [users, filter]);
 
   return (
@@ -65,7 +69,7 @@ const AdminUsuarios: React.FC = () => {
             <h2>Admin Usuários</h2>
             <p className="admin-subtitle">
               Gerencie permissões com rapidez
-              <span className="admin-counters"> • Admins: {adminCount} | Usuários: {userCount}</span>
+              <span className="admin-counters"> • Admins: {adminCountDisplay} | Usuários: {userCountDisplay}</span>
             </p>
           </div>
           <div className="admin-actions">
@@ -101,8 +105,8 @@ const AdminUsuarios: React.FC = () => {
                     <div className="avatar" aria-hidden="true">{u.email.slice(0,1).toUpperCase()}</div>
                     <div className="user-info">
                       <div className="user-email">{u.email}</div>
-                      <div className={`role-badge ${u.role === 'master' ? 'master' : u.role === 'admin' ? 'admin' : 'user'}`}>
-                        {u.role === 'master' ? 'Master' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
+                      <div className={`role-badge ${displayRoleOf(u) === 'master' ? 'master' : displayRoleOf(u) === 'admin' ? 'admin' : 'user'}`}>
+                        {displayRoleOf(u) === 'master' ? 'Master' : displayRoleOf(u) === 'admin' ? 'Administrador' : 'Usuário'}
                       </div>
                     </div>
                     <div className="user-id">#{u.id}</div>
@@ -110,14 +114,14 @@ const AdminUsuarios: React.FC = () => {
                   <div className="user-actions">
                     <button
                       className="cta-btn"
-                      disabled={updatingId === u.id || u.role === 'admin' || u.role === 'master'}
+                      disabled={updatingId === u.id || displayRoleOf(u) === 'admin' || displayRoleOf(u) === 'master'}
                       onClick={() => handleChangeRole(u.id, 'admin')}
                     >
                       {updatingId === u.id ? 'Aplicando...' : 'Promover a Admin'}
                     </button>
                     <button
                       className="cta-btn"
-                      disabled={updatingId === u.id || u.role === 'user' || u.role === 'master'}
+                      disabled={updatingId === u.id || displayRoleOf(u) === 'user' || displayRoleOf(u) === 'master'}
                       onClick={() => handleChangeRole(u.id, 'user')}
                       style={{ background: 'linear-gradient(90deg,#7f8c8d,#95a5a6)' }}
                     >
