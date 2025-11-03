@@ -29,6 +29,8 @@ const AdminPacotes: React.FC = () => {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
+  const [nationalCount, setNationalCount] = useState<number | null>(null);
+  const [internationalCount, setInternationalCount] = useState<number | null>(null);
 
   const canSubmit = useMemo(() => form.nome && form.preco && form.descricao, [form]);
 
@@ -65,7 +67,21 @@ const AdminPacotes: React.FC = () => {
     }
   }
 
-  useEffect(() => { load(); }, [tipoFilter, token]);
+  useEffect(() => { load(); loadCounts(); }, [tipoFilter, token]);
+
+  async function loadCounts() {
+    if (!token) return;
+    try {
+      const [nat, inter] = await Promise.all([
+        getPackages('nacional', token),
+        getPackages('internacional', token),
+      ]);
+      setNationalCount(Array.isArray(nat) ? nat.length : 0);
+      setInternationalCount(Array.isArray(inter) ? inter.length : 0);
+    } catch {
+      // contador é auxiliar, falha silenciosa
+    }
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -74,6 +90,7 @@ const AdminPacotes: React.FC = () => {
       const created = await createPackage({ ...form, tipo: form.tipo }, token);
       if (created.tipo === tipoFilter) setItems((prev) => [created, ...prev]);
       setForm(emptyForm);
+      loadCounts();
     } catch (err) {
       alert('Erro ao criar pacote');
     }
@@ -89,6 +106,7 @@ const AdminPacotes: React.FC = () => {
       }
       setEditingId(null);
       setForm(emptyForm);
+      loadCounts();
     } catch (err) {
       alert('Erro ao atualizar pacote');
     }
@@ -100,6 +118,7 @@ const AdminPacotes: React.FC = () => {
     try {
       await deletePackage(id, token);
       setItems((prev) => prev.filter((p) => p.id !== id));
+      loadCounts();
     } catch (err) {
       alert('Erro ao remover pacote');
     }
@@ -124,14 +143,32 @@ const AdminPacotes: React.FC = () => {
   return (
     <section className="container admin-page">
       <div className="admin-header">
-        <button className="cta-btn" onClick={() => navigate('/')}>Voltar para Home</button>
-        <h2>Administração de Pacotes</h2>
+        <button className="back-btn ghost" onClick={() => navigate('/')}>
+          <span className="btn-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12H9" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+          Voltar para Home
+        </button>
+        <div className="admin-title">
+          <h2>Administração de Pacotes</h2>
+          <p className="admin-subtitle">
+            Gerencie nacionais e internacionais com rapidez
+            {nationalCount !== null && internationalCount !== null && (
+              <span className="admin-counters"> • Nacionais: {nationalCount} | Internacionais: {internationalCount}</span>
+            )}
+          </p>
+        </div>
+        <div className="admin-actions">
+          <button className="cta-btn" onClick={openCreateModal}>
+            <span className="btn-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            Novo pacote
+          </button>
+        </div>
       </div>
 
       <div className="admin-content">
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.6rem' }}>
-          <button className="cta-btn" onClick={openCreateModal}>Novo pacote</button>
-        </div>
         <div className="admin-tabs">
           <button
             className={`segmented-btn ${tipoFilter === 'nacional' ? 'active' : ''}`}
@@ -162,7 +199,7 @@ const AdminPacotes: React.FC = () => {
                 <h3>{p.nome}</h3>
                 <p className="preco">{p.preco}</p>
                 <p style={{ color: '#444', marginTop: 8 }}>{p.descricao}</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                <div className="admin-card-actions">
                   <button className="cta-btn" onClick={() => startEdit(p)}>Editar</button>
                   <button className="cta-btn" onClick={() => handleDelete(p.id!)} style={{ background: 'linear-gradient(90deg,#c0392b,#e74c3c)' }}>Remover</button>
                 </div>
