@@ -70,7 +70,7 @@ export async function register(email: string, password: string): Promise<LoginRe
   return res.json();
 }
 
-export async function getPackages(tipo: 'nacional' | 'internacional', token: string): Promise<TravelPackage[]> {
+export async function getPackages(tipo: 'nacional' | 'internacional', token?: string): Promise<TravelPackage[]> {
   const url = `${API_BASE_URL}/packages?tipo=${encodeURIComponent(tipo)}`;
   const res = await fetch(url, {
     headers: getAuthHeaders(token),
