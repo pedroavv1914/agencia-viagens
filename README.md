@@ -58,7 +58,7 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🎨 Rodar Frontend (em `Frontend/`):
   - `npm install`
   - `npm run dev`
-  - App em `http://localhost:5174`.
+  - App em `http://localhost:5173`.
 - ⚙️ Rodar Backend sem Docker (em `Backend/`):
   - `npm install`
   - `npm run dev`
@@ -70,10 +70,19 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - ⚙️ Em produção, o Swagger pode ser desabilitado por segurança. Controle com `SWAGGER_ENABLED=true|false` no `.env` do backend.
 - ℹ️ Para seu fluxo de cadastro via Swagger, mantenha `SWAGGER_ENABLED=true` em produção enquanto precisar usar a UI.
 
+**👤 Papéis e Acessos (Roles)**
+- `user`: pode navegar e visualizar pacotes.
+- `admin`: pode criar, editar, excluir pacotes e fazer upload de imagens.
+- `master`: além de poder gerenciar pacotes, pode gerenciar papéis de usuários. A rota de usuários é restrita ao master.
+- O master é determinado por `MASTER_EMAIL` (backend). No frontend de desenvolvimento, você pode definir `VITE_MASTER_EMAIL` para garantir que o badge e as rotas reflitam esse papel.
+
 **🔐 Autenticação JWT**
 - ➡️ Use `Authorization: Bearer <token>` nas rotas protegidas.
 - 🔑 Fluxo:
-  - `POST /auth/login` → retorna `token`.
+  - `POST /auth/login` → retorna `token` e `role`.
+  - `POST /auth/register` → cria usuário e retorna `token` e `role`.
+  - `GET /auth/me` → retorna `email` e `role` do token atual.
+  - `POST /auth/refresh` → reemite `token` sincronizando `role` com o banco/ambiente.
   - Use o token para criar/editar/excluir pacotes.
 - 🌐 `GET /packages` pode ser público (sem token), conforme configuração.
 
@@ -81,10 +90,10 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🔗 Opção 1: informar URL no campo de imagem.
 - 📤 Opção 2: upload de arquivo local (frontend envia base64, backend salva e expõe).
 - `POST /packages/upload`
-  - Body (JSON): `{ "dataUrl": "data:image/png;base64,<BASE64>" }`
-  - Resposta: `{ "url": "http://localhost:3000/uploads/<arquivo>.png" }`
+  - Body (JSON): `{ "filename": "imagem.png", "data": "data:image/png;base64,<BASE64>" }`
+  - Resposta: `{ "url": "/uploads/<arquivo>.png" }`
   - Exemplo `curl`:
-    - `curl -X POST http://localhost:3000/packages/upload -H "Content-Type: application/json" -d '{"dataUrl":"data:image/png;base64,<BASE64>"}'`
+    - `curl -X POST http://localhost:3000/packages/upload -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d '{"filename":"foto.png","data":"data:image/png;base64,<BASE64>"}'`
 
 **🛣️ Principais Endpoints**
 - `GET /packages` — lista pacotes
@@ -94,10 +103,16 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - `POST /packages/upload` — upload base64; retorna URL pública
 - `GET /uploads/<nome>` — serve imagem estática
 - `POST /auth/login` — autentica e retorna JWT
+ - `POST /auth/register` — cria usuário
+ - `GET /auth/me` — informações do usuário autenticado
+ - `POST /auth/refresh` — reemite token atualizado
+ - `GET /admin/users` — listar usuários (master)
+ - `PATCH /admin/users/:id/role` — atualizar papel para `admin` ou `user` (master)
 
 **🎨 Frontend (Vite + React)**
 - 🧾 Scripts (em `Frontend/package.json`): `npm run dev`, `npm run build`, `npm run preview`.
 - 🔗 `VITE_API_BASE_URL` define a URL da API.
+- 👑 `VITE_MASTER_EMAIL` (opcional em dev) define qual email deve ser tratado visualmente como master para exibição de badge e acesso à UI de usuários, mesmo antes do backend refletir a promoção.
 - 🚀 Deploy na Vercel usando `vercel.json`; sem necessidade de `base` especial.
 
 **⚙️ Backend (Express + TypeORM)**
@@ -105,6 +120,9 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🛣️ Rotas em `Backend/src/routes/` (incl. `packages.ts` e upload).
 - 📁 `server.ts` cria `uploads` e serve estático em `/uploads`.
 - 🏗️ Build de produção em `Backend/dist/`.
+ - 🔐 Segurança: `helmet`, `hpp`, `express-rate-limit` (global e específico para login) e limite de `express.json { limit: '1mb' }`.
+ - 🔗 CORS: defina `CORS_ORIGIN` para restringir a origem permitida.
+ - 📘 Swagger: controlado por `SWAGGER_ENABLED=true|false`.
 
 **🐳 Docker**
 - 📦 Imagem do backend em `ghcr.io/<owner>/agencia-viagens-backend:<tag>`.
@@ -129,6 +147,7 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
   - `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `SSH_PORT`
   - `PORT`, `JWT_SECRET`, `MASTER_EMAIL`, `MASTER_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, `USER_PASSWORD`
   - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+  - `SWAGGER_ENABLED`, `CORS_ORIGIN`
 
 **🚀 Deploy**
 - 🎨 Frontend (Vercel):
@@ -147,6 +166,12 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🧪 Upload: confirme `dataUrl` válido e permissões em `Backend/uploads`.
 - 🔗 Vercel sem API: forneça backend público e atualize `VITE_API_BASE_URL`.
 - 🔐 Segurança adicional habilitada: `helmet`, `hpp`, `rate-limit` e limite de `express.json`. Se necessário, ajuste `CORS_ORIGIN` para seu domínio.
+ - 🗄️ Banco de dados: em desenvolvimento, o backend tenta criar o banco se não existir (`ensureDatabaseExists`) e usa `synchronize: true` no TypeORM. Em produção, desabilite a criação automática e gerencie migrações.
+
+**🧩 Regras de Acesso na UI**
+- Painel “Admin Pacotes” acessível a `admin` e `master`.
+- Painel “Admin Usuários” acessível apenas ao `master`.
+- O usuário com email igual a `MASTER_EMAIL` sempre recebe `role: master` via backend (login/refresh). No frontend, `VITE_MASTER_EMAIL` garante consistência visual em dev.
 
 **🤝 Como Contribuir**
 - 🪄 Use feature branches e siga o estilo do projeto.
