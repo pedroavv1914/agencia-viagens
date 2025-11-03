@@ -2,26 +2,18 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PacoteModal from '../components/PacoteModal';
 import '../components/Pacotes.css';
-import { pacotesNacionais } from '../components/PacotesNacionais';
-import { pacotesInternacionais } from '../components/PacotesInternacionais';
-
-// Pacotes EXTRAS exclusivos da tela VerTodos
-const pacotesNacionaisExtras = [
-  { nome: 'Serra do Cipó', preco: 'R$ 2.100', descricao: 'Natureza, cachoeiras e trilhas em Minas Gerais.' },
-  { nome: 'Ilha do Mel', preco: 'R$ 2.350', descricao: 'Refúgio paradisíaco no litoral do Paraná.' },
-  { nome: 'Alter do Chão', preco: 'R$ 2.650', descricao: 'O Caribe Amazônico, praias de rio e cultura paraense.' },
-];
-const pacotesInternacionaisExtras = [
-  { nome: 'Patagônia', preco: 'US$ 1.950', descricao: 'Aventura e paisagens glaciais entre Argentina e Chile.' },
-  { nome: 'Egito Clássico', preco: 'US$ 2.700', descricao: 'Pirâmides, templos e cruzeiro pelo Nilo.' },
-  { nome: 'Tailândia', preco: 'US$ 2.400', descricao: 'Templos, praias paradisíacas e cultura oriental.' },
-];
+import { getPackages } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 export default function VerTodos() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [pacoteSelecionado, setPacoteSelecionado] = React.useState<any>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useAuth();
+
+  const [nacionais, setNacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>([]);
+  const [internacionais, setInternacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>([]);
 
   // Determinar o filtro pela rota
   let mostrarNacionais = true;
@@ -34,6 +26,37 @@ export default function VerTodos() {
     mostrarNacionais = false;
     titulo = 'Pacotes Internacionais';
   }
+
+  // Busca dados do backend conforme a aba selecionada
+  React.useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        if (mostrarNacionais) {
+          const data = await getPackages('nacional', token ?? undefined);
+          if (!active) return;
+          if (Array.isArray(data)) {
+            setNacionais(data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem })));
+          }
+        } else {
+          setNacionais([]);
+        }
+        if (mostrarInternacionais) {
+          const data = await getPackages('internacional', token ?? undefined);
+          if (!active) return;
+          if (Array.isArray(data)) {
+            setInternacionais(data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem })));
+          }
+        } else {
+          setInternacionais([]);
+        }
+      } catch {
+        // falha silenciosa: mantém listas atuais
+      }
+    }
+    load();
+    return () => { active = false; };
+  }, [location.pathname, token]);
 
   function handleOpenModal(pacote: any) {
     setPacoteSelecionado(pacote);
@@ -62,7 +85,7 @@ export default function VerTodos() {
               justifyItems: 'center',
               marginBottom: '3.5rem',
             }}>
-              {[...pacotesNacionais, ...pacotesNacionaisExtras].map((p: any) => (
+              {nacionais.map((p: any) => (
                 <div className="pacote-card" key={p.nome + (p.preco || '')} style={{ width: 260, minWidth: 220, maxWidth: 300 }}>
                   {p.imagem ? (
                     <img src={p.imagem} alt={p.nome} />
@@ -106,7 +129,7 @@ export default function VerTodos() {
               gap: '2rem',
               justifyItems: 'center',
             }}>
-              {[...pacotesInternacionais, ...pacotesInternacionaisExtras].map((p: any) => (
+              {internacionais.map((p: any) => (
                 <div className="pacote-card" key={p.nome + (p.preco || '')} style={{ width: 260, minWidth: 220, maxWidth: 300 }}>
                   {p.imagem ? (
                     <img src={p.imagem} alt={p.nome} />
