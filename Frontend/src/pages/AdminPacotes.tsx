@@ -31,6 +31,8 @@ const AdminPacotes: React.FC = () => {
   const [showFormModal, setShowFormModal] = useState(false);
   const [nationalCount, setNationalCount] = useState<number | null>(null);
   const [internationalCount, setInternationalCount] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const canSubmit = useMemo(() => form.nome && form.preco && form.descricao, [form]);
 
@@ -87,9 +89,9 @@ const AdminPacotes: React.FC = () => {
     e.preventDefault();
     if (!token || !canSubmit) return;
     try {
-      const created = await createPackage({ ...form, tipo: form.tipo }, token);
-      if (created.tipo === tipoFilter) setItems((prev) => [created, ...prev]);
+      await createPackage({ ...form, tipo: form.tipo }, token);
       setForm(emptyForm);
+      await load();
       loadCounts();
     } catch (err) {
       alert('Erro ao criar pacote');
@@ -99,13 +101,10 @@ const AdminPacotes: React.FC = () => {
   async function handleUpdate(id: number) {
     if (!token) return;
     try {
-      const updated = await updatePackage(id, form, token);
-      setItems((prev) => prev.filter((p) => p.id !== id));
-      if (updated.tipo === tipoFilter) {
-        setItems((prev) => [updated, ...prev]);
-      }
+      await updatePackage(id, form, token);
       setEditingId(null);
       setForm(emptyForm);
+      await load();
       loadCounts();
     } catch (err) {
       alert('Erro ao atualizar pacote');
@@ -114,13 +113,16 @@ const AdminPacotes: React.FC = () => {
 
   async function handleDelete(id: number) {
     if (!token) return;
-    if (!confirm('Tem certeza que deseja remover este pacote?')) return;
     try {
+      setDeleting(true);
       await deletePackage(id, token);
-      setItems((prev) => prev.filter((p) => p.id !== id));
+      await load();
       loadCounts();
     } catch (err) {
       alert('Erro ao remover pacote');
+    } finally {
+      setDeleting(false);
+      setConfirmDeleteId(null);
     }
   }
 
@@ -143,46 +145,50 @@ const AdminPacotes: React.FC = () => {
   return (
     <section className="container admin-page">
       <div className="admin-header">
-        <button className="back-btn ghost" onClick={() => navigate('/')}>
-          <span className="btn-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12H9" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </span>
-          Voltar para Home
-        </button>
-        <div className="admin-title">
-          <h2>Administração de Pacotes</h2>
-          <p className="admin-subtitle">
-            Gerencie nacionais e internacionais com rapidez
-            {nationalCount !== null && internationalCount !== null && (
-              <span className="admin-counters"> • Nacionais: {nationalCount} | Internacionais: {internationalCount}</span>
-            )}
-          </p>
-        </div>
-        <div className="admin-actions">
-          <button className="cta-btn" onClick={openCreateModal}>
+        <div className="header-top">
+          <button className="back-btn ghost" onClick={() => navigate('/')}>
             <span className="btn-icon" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12H9" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </span>
-            Novo pacote
+            Voltar para Home
           </button>
+          <div className="admin-title">
+            <h2>Administração de Pacotes</h2>
+            <p className="admin-subtitle">
+              Gerencie nacionais e internacionais com rapidez
+              {nationalCount !== null && internationalCount !== null && (
+                <span className="admin-counters"> • Nacionais: {nationalCount} | Internacionais: {internationalCount}</span>
+              )}
+            </p>
+          </div>
+          <div className="admin-actions">
+            <button className="cta-btn" onClick={openCreateModal}>
+              <span className="btn-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
+              Novo pacote
+            </button>
+          </div>
+        </div>
+        <div className="header-tabs">
+          <div className="admin-tabs">
+            <button
+              className={`segmented-btn ${tipoFilter === 'nacional' ? 'active' : ''}`}
+              onClick={() => setTipoFilter('nacional')}
+            >
+              Nacionais
+            </button>
+            <button
+              className={`segmented-btn ${tipoFilter === 'internacional' ? 'active' : ''}`}
+              onClick={() => setTipoFilter('internacional')}
+            >
+              Internacionais
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="admin-content">
-        <div className="admin-tabs">
-          <button
-            className={`segmented-btn ${tipoFilter === 'nacional' ? 'active' : ''}`}
-            onClick={() => setTipoFilter('nacional')}
-          >
-            Nacionais
-          </button>
-          <button
-            className={`segmented-btn ${tipoFilter === 'internacional' ? 'active' : ''}`}
-            onClick={() => setTipoFilter('internacional')}
-          >
-            Internacionais
-          </button>
-        </div>
 
         {error && <p style={{ color: 'crimson', textAlign: 'center' }}>{error}</p>}
         {loading ? (
@@ -201,7 +207,7 @@ const AdminPacotes: React.FC = () => {
                 <p style={{ color: '#444', marginTop: 8 }}>{p.descricao}</p>
                 <div className="admin-card-actions">
                   <button className="cta-btn" onClick={() => startEdit(p)}>Editar</button>
-                  <button className="cta-btn" onClick={() => handleDelete(p.id!)} style={{ background: 'linear-gradient(90deg,#c0392b,#e74c3c)' }}>Remover</button>
+                  <button className="cta-btn" onClick={() => setConfirmDeleteId(p.id!)} style={{ background: 'linear-gradient(90deg,#c0392b,#e74c3c)' }}>Remover</button>
                 </div>
               </div>
             ))}
@@ -251,6 +257,22 @@ const AdminPacotes: React.FC = () => {
           </div>
         )}
       </div>
+
+      {confirmDeleteId !== null && (
+        <div className="modal-overlay" onClick={() => setConfirmDeleteId(null)}>
+          <div className="modal-content" style={{ maxWidth: 520, width: '92%' }} onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setConfirmDeleteId(null)}>&times;</button>
+            <h3 style={{ marginTop: 0 }}>Confirmar exclusão</h3>
+            <p style={{ color: '#444' }}>Tem certeza que deseja remover este pacote? Esta ação não poderá ser desfeita.</p>
+            <div className="admin-form-actions" style={{ display: 'flex', justifyContent: 'center', gap: '0.8rem', marginTop: '1rem' }}>
+              <button className="cta-btn" onClick={() => setConfirmDeleteId(null)} style={{ background: 'linear-gradient(90deg,#7f8c8d,#95a5a6)' }}>Cancelar</button>
+              <button className="cta-btn" onClick={() => handleDelete(confirmDeleteId!)} disabled={deleting} style={{ background: 'linear-gradient(90deg,#c0392b,#e74c3c)' }}>
+                {deleting ? 'Removendo...' : 'Remover'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
