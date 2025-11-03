@@ -51,10 +51,9 @@ const PacotesInternacionais: React.FC = () => {
 
   useEffect(() => {
     async function fetchData() {
-      if (!token) return;
       try {
-        const data = await getPackages('internacional', token);
-        if (Array.isArray(data) && data.length) {
+        const data = await getPackages('internacional', token ?? undefined);
+        if (Array.isArray(data)) {
           const normalized = data.map((p) => ({
             nome: p.nome,
             preco: p.preco,
