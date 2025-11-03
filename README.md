@@ -125,7 +125,7 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🎨 Frontend (Vercel): `VITE_API_BASE_URL` (Environment Variable; URL pública da API)
 - ⚙️ Backend Deploy:
   - `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `SSH_PORT`
-  - `PORT`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, `USER_PASSWORD`
+  - `PORT`, `JWT_SECRET`, `MASTER_EMAIL`, `MASTER_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USER_EMAIL`, `USER_PASSWORD`
   - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 
 **🚀 Deploy**
