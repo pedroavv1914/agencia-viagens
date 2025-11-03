@@ -58,7 +58,10 @@ const PacotesNacionais: React.FC = () => {
             descricao: p.descricao,
             imagem: p.imagem,
           }));
-          setPacotes(normalized);
+          // Só substitui os defaults se o backend tiver conteúdo
+          if (normalized.length > 0) {
+            setPacotes(normalized);
+          }
         }
       } catch (_) {
         // mantém dados locais

@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PacoteModal from '../components/PacoteModal';
 import '../components/Pacotes.css';
 import { getPackages } from '../services/api';
+import { pacotesNacionais as defaultsNacionais } from '../components/PacotesNacionais';
+import { pacotesInternacionais as defaultsInternacionais } from '../components/PacotesInternacionais';
 import { useAuth } from '../hooks/useAuth';
 
 export default function VerTodos() {
@@ -12,8 +14,8 @@ export default function VerTodos() {
   const location = useLocation();
   const { token } = useAuth();
 
-  const [nacionais, setNacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>([]);
-  const [internacionais, setInternacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>([]);
+  const [nacionais, setNacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>(defaultsNacionais);
+  const [internacionais, setInternacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>(defaultsInternacionais);
 
   // Determinar o filtro pela rota
   let mostrarNacionais = true;
@@ -36,7 +38,10 @@ export default function VerTodos() {
           const data = await getPackages('nacional', token ?? undefined);
           if (!active) return;
           if (Array.isArray(data)) {
-            setNacionais(data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem })));
+            const normalized = data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem }));
+            if (normalized.length > 0) {
+              setNacionais(normalized);
+            }
           }
         } else {
           setNacionais([]);
@@ -45,7 +50,10 @@ export default function VerTodos() {
           const data = await getPackages('internacional', token ?? undefined);
           if (!active) return;
           if (Array.isArray(data)) {
-            setInternacionais(data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem })));
+            const normalized = data.map((p) => ({ nome: p.nome, preco: p.preco, descricao: p.descricao, imagem: p.imagem }));
+            if (normalized.length > 0) {
+              setInternacionais(normalized);
+            }
           }
         } else {
           setInternacionais([]);
