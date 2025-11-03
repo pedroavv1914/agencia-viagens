@@ -13,6 +13,8 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@palazzo.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const USER_EMAIL = process.env.USER_EMAIL || 'user@palazzo.com';
 const USER_PASSWORD = process.env.USER_PASSWORD || 'user123';
+const MASTER_EMAIL = process.env.MASTER_EMAIL || 'master@palazzo.com';
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'master123';
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
@@ -20,10 +22,13 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ message: 'Email e senha são obrigatórios' });
   }
 
-  let role: 'admin' | 'user' | null = null;
+  let role: 'admin' | 'user' | 'master' | null = null;
   let expectedPassword = '';
 
-  if (email === ADMIN_EMAIL) {
+  if (email === MASTER_EMAIL) {
+    role = 'master';
+    expectedPassword = MASTER_PASSWORD;
+  } else if (email === ADMIN_EMAIL) {
     role = 'admin';
     expectedPassword = ADMIN_PASSWORD;
   } else if (email === USER_EMAIL) {
@@ -93,6 +98,10 @@ router.post('/refresh', requireAuth, async (req, res) => {
   }
 
   // Fallback para contas de ambiente
+  if (email === MASTER_EMAIL) {
+    const token = jwt.sign({ email, role: 'master' }, JWT_SECRET, { expiresIn: '1d' });
+    return res.json({ token, role: 'master' });
+  }
   if (email === ADMIN_EMAIL) {
     const token = jwt.sign({ email, role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
     return res.json({ token, role: 'admin' });
