@@ -1,0 +1,37 @@
+databases:
+  - name: agencia-db
+    plan: free
+
+services:
+  - type: web
+    name: agencia-viagens-backend
+    env: node
+    plan: free
+    rootDirectory: Backend
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/server.js
+    autoDeploy: true
+    healthCheckPath: /packages
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: agencia-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: agencia-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: agencia-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: agencia-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: agencia-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
