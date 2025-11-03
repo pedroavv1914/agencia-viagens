@@ -49,11 +49,9 @@ const PacotesNacionais: React.FC = () => {
 
   useEffect(() => {
     async function fetchData() {
-      if (!token) return;
       try {
-        const data = await getPackages('nacional', token);
-        if (Array.isArray(data) && data.length) {
-          // normaliza formato
+        const data = await getPackages('nacional', token ?? undefined);
+        if (Array.isArray(data)) {
           const normalized = data.map((p) => ({
             nome: p.nome,
             preco: p.preco,
