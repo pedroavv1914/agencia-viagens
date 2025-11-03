@@ -101,21 +101,23 @@ const AdminUsuarios: React.FC = () => {
                     <div className="avatar" aria-hidden="true">{u.email.slice(0,1).toUpperCase()}</div>
                     <div className="user-info">
                       <div className="user-email">{u.email}</div>
-                      <div className={`role-badge ${u.role === 'admin' ? 'admin' : 'user'}`}>{u.role === 'admin' ? 'Administrador' : 'Usuário'}</div>
+                      <div className={`role-badge ${u.role === 'master' ? 'master' : u.role === 'admin' ? 'admin' : 'user'}`}>
+                        {u.role === 'master' ? 'Master' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
+                      </div>
                     </div>
                     <div className="user-id">#{u.id}</div>
                   </div>
                   <div className="user-actions">
                     <button
                       className="cta-btn"
-                      disabled={updatingId === u.id || u.role === 'admin'}
+                      disabled={updatingId === u.id || u.role === 'admin' || u.role === 'master'}
                       onClick={() => handleChangeRole(u.id, 'admin')}
                     >
                       {updatingId === u.id ? 'Aplicando...' : 'Promover a Admin'}
                     </button>
                     <button
                       className="cta-btn"
-                      disabled={updatingId === u.id || u.role === 'user'}
+                      disabled={updatingId === u.id || u.role === 'user' || u.role === 'master'}
                       onClick={() => handleChangeRole(u.id, 'user')}
                       style={{ background: 'linear-gradient(90deg,#7f8c8d,#95a5a6)' }}
                     >
