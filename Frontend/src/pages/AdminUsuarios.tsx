@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getUsers, updateUserRole } from '../services/api';
 import type { AdminUser, UserRole } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import './AdminUsuarios.css';
 
 const AdminUsuarios: React.FC = () => {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [filter, setFilter] = useState<'todos' | 'admin' | 'user'>('todos');
 
   async function load() {
     if (!token) return;
@@ -40,54 +44,90 @@ const AdminUsuarios: React.FC = () => {
     }
   }
 
+  const adminCount = useMemo(() => users.filter(u => u.role === 'admin').length, [users]);
+  const userCount = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
+  const filtered = useMemo(() => {
+    if (filter === 'todos') return users;
+    return users.filter(u => u.role === filter);
+  }, [users, filter]);
+
   return (
-    <section className="container" style={{ padding: '2rem 0' }}>
-      <h2>Admin Usuários</h2>
-      <p>Gerencie permissões dos usuários cadastrados.</p>
-      {error && <div style={{ color: 'red', marginTop: '0.5rem' }}>{error}</div>}
+    <section className="container admin-users-page">
+      <div className="admin-header">
+        <div className="header-top">
+          <button className="back-btn ghost" onClick={() => navigate('/')}>
+            <span className="btn-icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 7l-5 5 5 5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12H9" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+            Voltar para Home
+          </button>
+          <div className="admin-title">
+            <h2>Admin Usuários</h2>
+            <p className="admin-subtitle">
+              Gerencie permissões com rapidez
+              <span className="admin-counters"> • Admins: {adminCount} | Usuários: {userCount}</span>
+            </p>
+          </div>
+          <div className="admin-actions">
+            <button className="cta-btn" onClick={load}>
+              <span className="btn-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v8l5 3" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
+              Recarregar
+            </button>
+          </div>
+        </div>
+        <div className="header-tabs">
+          <div className="admin-tabs">
+            <button className={`segmented-btn ${filter === 'todos' ? 'active' : ''}`} onClick={() => setFilter('todos')}>Todos</button>
+            <button className={`segmented-btn ${filter === 'admin' ? 'active' : ''}`} onClick={() => setFilter('admin')}>Admins</button>
+            <button className={`segmented-btn ${filter === 'user' ? 'active' : ''}`} onClick={() => setFilter('user')}>Usuários</button>
+          </div>
+        </div>
+      </div>
+
+      {error && <p style={{ color: 'crimson', textAlign: 'center' }}>{error}</p>}
       {loading ? (
-        <p>Carregando usuários...</p>
+        <p style={{ textAlign: 'center' }}>Carregando usuários...</p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>ID</th>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Email</th>
-                <th style={{ textAlign: 'left', borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Role</th>
-                <th style={{ borderBottom: '1px solid #ddd', padding: '0.5rem' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{u.id}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{u.email}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>{u.role === 'admin' ? 'Administrador' : 'Usuário'}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: '0.5rem' }}>
+        <div className="admin-users-content">
+          {filtered.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#5a6a7a' }}>Nenhum usuário nesta aba.</p>
+          ) : (
+            <div className="users-grid">
+              {filtered.map((u) => (
+                <div key={u.id} className="user-card">
+                  <div className="user-top">
+                    <div className="avatar" aria-hidden="true">{u.email.slice(0,1).toUpperCase()}</div>
+                    <div className="user-info">
+                      <div className="user-email">{u.email}</div>
+                      <div className={`role-badge ${u.role === 'admin' ? 'admin' : 'user'}`}>{u.role === 'admin' ? 'Administrador' : 'Usuário'}</div>
+                    </div>
+                    <div className="user-id">#{u.id}</div>
+                  </div>
+                  <div className="user-actions">
                     <button
+                      className="cta-btn"
                       disabled={updatingId === u.id || u.role === 'admin'}
                       onClick={() => handleChangeRole(u.id, 'admin')}
-                      style={{ marginRight: '0.5rem' }}
                     >
-                      Promover a Admin
+                      {updatingId === u.id ? 'Aplicando...' : 'Promover a Admin'}
                     </button>
                     <button
+                      className="cta-btn"
                       disabled={updatingId === u.id || u.role === 'user'}
                       onClick={() => handleChangeRole(u.id, 'user')}
+                      style={{ background: 'linear-gradient(90deg,#7f8c8d,#95a5a6)' }}
                     >
-                      Rebaixar a Usuário
+                      {updatingId === u.id ? 'Aplicando...' : 'Rebaixar a Usuário'}
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
       )}
-      <div style={{ marginTop: '1rem' }}>
-        <button onClick={load}>Recarregar</button>
-      </div>
     </section>
   );
 };
