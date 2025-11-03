@@ -44,7 +44,7 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute requireAdmin>
+          <ProtectedRoute requireMaster>
             <AdminUsuarios />
           </ProtectedRoute>
         }
