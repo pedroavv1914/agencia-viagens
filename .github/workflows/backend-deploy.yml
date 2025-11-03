@@ -1,0 +1,53 @@
+name: Backend Deploy
+
+on:
+  workflow_run:
+    workflows: ["Backend CI/CD"]
+    types: [completed]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve image reference
+        id: meta
+        run: |
+          echo "IMAGE=ghcr.io/${{ github.repository_owner }}/agencia-viagens-backend:latest" >> $GITHUB_OUTPUT
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -e
+            IMAGE="${{ steps.meta.outputs.IMAGE }}"
+            echo "Using image: $IMAGE"
+
+            # Prepare env file on server
+            sudo mkdir -p /opt/agencia
+            sudo tee /opt/agencia/env > /dev/null << 'EOF'
+PORT=${{ secrets.PORT || 3000 }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+USER_EMAIL=${{ secrets.USER_EMAIL }}
+USER_PASSWORD=${{ secrets.USER_PASSWORD }}
+DB_HOST=${{ secrets.DB_HOST }}
+DB_PORT=${{ secrets.DB_PORT || 5432 }}
+DB_USER=${{ secrets.DB_USER }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+DB_NAME=${{ secrets.DB_NAME }}
+EOF
+
+            # Deploy container
+            sudo docker pull "$IMAGE"
+            sudo docker rm -f agencia_viagens_api || true
+            sudo docker run -d --name agencia_viagens_api --restart=always --env-file /opt/agencia/env -p 3000:3000 "$IMAGE"
