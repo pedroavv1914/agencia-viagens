@@ -44,8 +44,6 @@ const AdminUsuarios: React.FC = () => {
     }
   }
 
-  const adminCount = useMemo(() => users.filter(u => u.role === 'admin').length, [users]);
-  const userCount = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
   const MASTER_EMAIL = (import.meta.env.VITE_MASTER_EMAIL as string | undefined)?.toLowerCase();
   const displayRoleOf = (u: AdminUser) => (u.email.toLowerCase() === MASTER_EMAIL ? 'master' : u.role);
   const adminCountDisplay = useMemo(() => users.filter(u => displayRoleOf(u) === 'admin').length, [users]);
