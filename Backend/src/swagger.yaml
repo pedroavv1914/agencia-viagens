@@ -66,6 +66,8 @@ paths:
       responses:
         '200':
           description: Lista de pacotes
+        '401':
+          description: Token ausente ou inválido
     post:
       summary: Criar pacote
       security:
