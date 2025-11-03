@@ -143,3 +143,23 @@ export async function updateUserRole(id: number, role: UserRole, token: string):
   if (!res.ok) throw new Error('Falha ao atualizar role');
   return res.json();
 }
+
+// Upload de imagem de pacote: envia arquivo como base64 e retorna URL pública
+export async function uploadPackageImage(file: File, token: string): Promise<string> {
+  const toDataUrl = (f: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (e) => reject(e);
+    reader.readAsDataURL(f);
+  });
+
+  const dataUrl = await toDataUrl(file);
+  const res = await fetch(`${API_BASE_URL}/packages/upload`, {
+    method: 'POST',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify({ filename: file.name, data: dataUrl }),
+  });
+  if (!res.ok) throw new Error('Falha ao enviar imagem');
+  const json = await res.json();
+  return json.url as string;
+}
