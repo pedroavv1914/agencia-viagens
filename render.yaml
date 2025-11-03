@@ -10,7 +10,7 @@ services:
     buildCommand: cd Backend && npm ci && npm run build
     startCommand: cd Backend && node dist/server.js
     autoDeploy: true
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: DB_HOST
         fromDatabase:

@@ -33,6 +33,14 @@ app.use('/uploads', express.static(uploadsDir));
 const swaggerDocument = YAML.load(__dirname + '/swagger.yaml');
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Healthcheck e raiz
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+app.get('/', (_req, res) => {
+  res.send('Agencia Viagens API online');
+});
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/packages', packageRoutes);
