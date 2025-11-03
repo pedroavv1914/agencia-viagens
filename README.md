@@ -67,6 +67,8 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 **📚 Documentação da API (Swagger)**
 - 📄 Baseada em `Backend/src/swagger.yaml`, exposta via `swagger-ui-express`.
 - 🔗 UI em `http://localhost:3000/docs` (ver `server.ts`).
+- ⚙️ Em produção, o Swagger pode ser desabilitado por segurança. Controle com `SWAGGER_ENABLED=true|false` no `.env` do backend.
+- ℹ️ Para seu fluxo de cadastro via Swagger, mantenha `SWAGGER_ENABLED=true` em produção enquanto precisar usar a UI.
 
 **🔐 Autenticação JWT**
 - ➡️ Use `Authorization: Bearer <token>` nas rotas protegidas.
@@ -144,6 +146,7 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - ❗ CORS: verifique `VITE_API_BASE_URL` e configure CORS no backend se necessário.
 - 🧪 Upload: confirme `dataUrl` válido e permissões em `Backend/uploads`.
 - 🔗 Vercel sem API: forneça backend público e atualize `VITE_API_BASE_URL`.
+- 🔐 Segurança adicional habilitada: `helmet`, `hpp`, `rate-limit` e limite de `express.json`. Se necessário, ajuste `CORS_ORIGIN` para seu domínio.
 
 **🤝 Como Contribuir**
 - 🪄 Use feature branches e siga o estilo do projeto.

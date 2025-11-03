@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AppDataSource } from '../data-source';
@@ -6,6 +7,9 @@ import { User } from '../entity/User';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+// Rate limit específico para login
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt';
 
@@ -16,7 +20,7 @@ const USER_PASSWORD = process.env.USER_PASSWORD || 'user123';
 const MASTER_EMAIL = process.env.MASTER_EMAIL || 'master@palazzo.com';
 const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'master123';
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
   if (!email || !password) {
     return res.status(400).json({ message: 'Email e senha são obrigatórios' });
