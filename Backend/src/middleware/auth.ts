@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-type Role = 'admin' | 'user';
+type Role = 'admin' | 'user' | 'master';
 
 declare global {
   namespace Express {
@@ -28,6 +28,15 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.user) return res.status(401).json({ message: 'Não autenticado' });
-  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Sem permissão' });
+  // Master também tem privilégios administrativos para pacotes
+  if (req.user.role !== 'admin' && req.user.role !== 'master') {
+    return res.status(403).json({ message: 'Sem permissão' });
+  }
+  next();
+}
+
+export function requireMaster(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) return res.status(401).json({ message: 'Não autenticado' });
+  if (req.user.role !== 'master') return res.status(403).json({ message: 'Sem permissão (master necessário)' });
   next();
 }
