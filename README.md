@@ -84,7 +84,7 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
   - `GET /auth/me` → retorna `email` e `role` do token atual.
   - `POST /auth/refresh` → reemite `token` sincronizando `role` com o banco/ambiente.
   - Use o token para criar/editar/excluir pacotes.
-- 🌐 `GET /packages` pode ser público (sem token), conforme configuração.
+ - 🌐 `GET /packages` agora exige token (privado).
 
 **🖼️ Upload de Imagens de Pacotes**
 - 🔗 Opção 1: informar URL no campo de imagem.
