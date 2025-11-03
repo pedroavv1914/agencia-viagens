@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { AppDataSource } from './data-source';
@@ -15,6 +17,17 @@ dotenv.config();
 const app = express();
 app.use(cors({ origin: '*', allowedHeaders: ['Content-Type', 'Authorization'] }));
 app.use(express.json());
+
+// Static: serve uploaded images
+const uploadsDir = path.resolve(process.cwd(), 'uploads');
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('Falha ao garantir pasta uploads:', e);
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Swagger
 const swaggerDocument = YAML.load(__dirname + '/swagger.yaml');
