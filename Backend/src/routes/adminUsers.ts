@@ -1,19 +1,19 @@
 import { Router } from 'express';
 import { AppDataSource } from '../data-source';
 import { User } from '../entity/User';
-import { requireAuth, requireAdmin } from '../middleware/auth';
+import { requireAuth, requireMaster } from '../middleware/auth';
 
 const router = Router();
 const repo = () => AppDataSource.getRepository(User);
 
-// Lista usuários (somente admin)
-router.get('/', requireAuth, requireAdmin, async (_req, res) => {
+// Lista usuários (somente master)
+router.get('/', requireAuth, requireMaster, async (_req, res) => {
   const users = await repo().find({ select: { id: true, email: true, role: true } });
   return res.json(users);
 });
 
-// Atualiza role de um usuário (somente admin)
-router.patch('/:id/role', requireAuth, requireAdmin, async (req, res) => {
+// Atualiza role de um usuário (somente master)
+router.patch('/:id/role', requireAuth, requireMaster, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const { role } = req.body as { role?: 'admin' | 'user' };
   if (role !== 'admin' && role !== 'user') {
