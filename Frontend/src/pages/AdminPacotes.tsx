@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './AdminPacotes.css';
 import '../components/PacoteModal.css';
 import type { TravelPackage } from '../services/api';
-import { createPackage, deletePackage, getPackages, updatePackage } from '../services/api';
+import { createPackage, deletePackage, getPackages, updatePackage, uploadPackageImage } from '../services/api';
 import { pacotesNacionais } from '../components/PacotesNacionais';
 import { pacotesInternacionais } from '../components/PacotesInternacionais';
 import { useAuth } from '../hooks/useAuth';
@@ -33,6 +33,7 @@ const AdminPacotes: React.FC = () => {
   const [internationalCount, setInternationalCount] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const canSubmit = useMemo(() => form.nome && form.preco && form.descricao, [form]);
 
@@ -142,6 +143,20 @@ const AdminPacotes: React.FC = () => {
     setShowFormModal(false);
   }
 
+  async function handleImageFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+    try {
+      setUploading(true);
+      const url = await uploadPackageImage(file, token);
+      setForm({ ...form, imagem: url });
+    } catch (err) {
+      alert('Falha ao enviar imagem');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <section className="container admin-page">
       <div className="admin-header">
@@ -238,7 +253,17 @@ const AdminPacotes: React.FC = () => {
                   </div>
                   <div>
                     <label className="admin-label">Imagem (URL)</label>
-                    <input value={form.imagem ?? ''} onChange={(e) => setForm({ ...form, imagem: e.target.value })} style={{ width: '100%', padding: '0.7rem', border: '1px solid #cce7ff', borderRadius: 10 }} />
+                    <input value={form.imagem ?? ''} onChange={(e) => setForm({ ...form, imagem: e.target.value })} placeholder="https://..." style={{ width: '100%', padding: '0.7rem', border: '1px solid #cce7ff', borderRadius: 10 }} />
+                    <div style={{ marginTop: '0.6rem' }}>
+                      <label className="admin-label" style={{ display: 'block', marginBottom: '0.3rem' }}>Ou enviar arquivo</label>
+                      <input type="file" accept="image/*" onChange={handleImageFileSelected} />
+                      {uploading && <p style={{ marginTop: '0.4rem', color: '#3b6ea5' }}>Enviando imagem...</p>}
+                      {form.imagem && (
+                        <div style={{ marginTop: '0.6rem' }}>
+                          <img src={form.imagem} alt="Prévia" style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #e6f2ff' }} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <label className="admin-label">Tipo</label>
