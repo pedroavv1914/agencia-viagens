@@ -6,7 +6,8 @@ import { requireAuth, requireAdmin } from '../middleware/auth';
 const router = Router();
 const repo = () => AppDataSource.getRepository(TravelPackage);
 
-router.get('/', requireAuth, async (req, res) => {
+// Listagem pública: não requer autenticação
+router.get('/', async (req, res) => {
   const { tipo } = req.query as { tipo?: string };
   const whereOpt = tipo ? { tipo: tipo as any } : undefined;
   const items = await repo().find({ where: whereOpt });
