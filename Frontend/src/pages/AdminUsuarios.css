@@ -133,6 +133,7 @@
 }
 .role-badge.admin { background: linear-gradient(90deg, #1677ff, #69b1ff); color: #fff; border-color: transparent; }
 .role-badge.user { background: #f2f8ff; color: #1f3a5f; }
+.role-badge.master { background: linear-gradient(90deg, #f59e0b, #f97316); color: #fff; border-color: transparent; }
 
 .user-actions {
   display: flex;
