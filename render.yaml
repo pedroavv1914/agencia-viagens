@@ -7,11 +7,10 @@ services:
     name: agencia-viagens-backend
     env: node
     plan: free
-    rootDirectory: Backend
-    buildCommand: npm ci && npm run build
-    startCommand: node dist/server.js
+    buildCommand: cd Backend && npm ci && npm run build
+    startCommand: cd Backend && node dist/server.js
     autoDeploy: true
-    healthCheckPath: /packages
+    healthCheckPath: /
     envVars:
       - key: DB_HOST
         fromDatabase:
