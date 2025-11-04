@@ -134,12 +134,11 @@ O objetivo deste README é ensinar alguém a entender a arquitetura, rodar local
 - 🎯 Frontend (Vercel): `vercel.json`
   - Build estático (Vite) com output `Frontend/dist`.
   - Configure `VITE_API_BASE_URL` nas Environment Variables da Vercel.
-- 🐳 Backend: `.github/workflows/backend.yml`
-  - Build TS, login no GHCR, build e push de Docker (`latest` e `${{ github.sha }}`).
-- 🚀 Deploy Backend: `.github/workflows/backend-deploy.yml`
-  - Dispara após “Backend CI/CD” via `workflow_run`.
-  - 🔐 SSH com secrets `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `SSH_PORT`.
-  - 🧩 Cria/atualiza `/opt/agencia/env` e sobe contêiner com a imagem `latest`.
+- 🖥️ Backend (Render): `render.yaml`
+  - Build: `cd Backend && npm ci && npm run build`; Start: `cd Backend && node dist/server.js`.
+  - Database gerenciado pela Render com envs injetados (host, port, user, password, database).
+  - Defina `JWT_SECRET` (gerado) e, opcionalmente, `SWAGGER_ENABLED` e `CORS_ORIGIN` para produção.
+ - Observação: Workflows alternativos (GHCR/SSH) estão presentes no repositório, porém os gatilhos automáticos foram desativados para evitar concorrência com Render/Vercel. Use apenas se desejar deploy por Docker/SSH.
 
 **🔑 Secrets Necessários**
 - 🎨 Frontend (Vercel): `VITE_API_BASE_URL` (Environment Variable; URL pública da API)

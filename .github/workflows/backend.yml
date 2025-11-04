@@ -1,10 +1,8 @@
 name: Backend CI/CD
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # Desativado push/PR automáticos; mantenha apenas execução manual pois o deploy usa Render
+  workflow_dispatch:
 
 jobs:
   build:

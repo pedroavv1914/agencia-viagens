@@ -1,8 +1,7 @@
 name: Frontend CI/CD
 
 on:
-  push:
-    branches: [ "main" ]
+  # Desativado o gatilho automático de push para evitar deploy duplicado (usando Vercel)
   workflow_dispatch:
 
 permissions:
