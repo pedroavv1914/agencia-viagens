@@ -1,46 +1,63 @@
+# Workflow de CI/CD do Backend
+# Responsável por: compilar o código TypeScript e construir/publicar a
+# imagem Docker no GitHub Container Registry (GHCR).
 name: Backend CI/CD
 
+# Gatilhos do workflow
+# Mantido somente execução manual para evitar conflitos com Render
 on:
-  # Desativado push/PR automáticos; mantenha apenas execução manual pois o deploy usa Render
   workflow_dispatch:
 
 jobs:
+  # Job de build: prepara o backend (instala, compila, valida)
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
+        # Todos os comandos abaixo rodam dentro do diretório Backend
         working-directory: Backend
     steps:
+      # Baixa o código do repositório
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Prepara Node.js na versão especificada para rodar npm e build
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
+      # Instala dependências de produção/ci com verificação de integridade
       - name: Install
         run: npm ci
 
+      # Compila o TypeScript gerando artefatos em dist/
       - name: Build TypeScript
         run: npm run build
 
+      # Passo de lint placeholder (não configurado no projeto)
       - name: Lint (skip if not configured)
         run: echo "No lint configured for backend"
 
+  # Job de publicação: constrói e envia a imagem Docker ao GHCR
   docker-publish:
     runs-on: ubuntu-latest
+    # Só inicia após o build terminar com sucesso
     needs: build
+    # Permissões do GITHUB_TOKEN: leitura do código e escrita em pacotes (GHCR)
     permissions:
       contents: read
       packages: write
     steps:
+      # Checkout é necessário para o contexto de build Docker
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Buildx permite builds multi-plataforma e cache otimizado
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Autentica no GHCR usando o GITHUB_TOKEN (permissões acima)
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -48,6 +65,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Constrói a imagem a partir de ./Backend e publica com duas tags:
+      # - latest: referência estável
+      # - sha: tag imutável por commit para rastreabilidade
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
