@@ -1,23 +1,31 @@
+# Workflow de Deploy do Backend via SSH/Docker
+# Responsável por: puxar imagem do GHCR e atualizar o container remoto.
 name: Backend Deploy
 
+# Gatilho encadeado: roda quando o workflow "Backend CI/CD" termina
+# com status de concluído (pode-se filtrar por sucesso no job se desejado)
 on:
   workflow_run:
     workflows: ["Backend CI/CD"]
     types: [completed]
 
+# Permissões usadas para resolver metadados e acessar pacotes se necessário
 permissions:
   contents: read
   packages: read
 
 jobs:
+  # Job de deploy: conecta ao servidor e sobe o container com a nova imagem
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Calcula a referência da imagem a ser usada (latest do repositório)
       - name: Resolve image reference
         id: meta
         run: |
           echo "IMAGE=ghcr.io/${{ github.repository_owner }}/agencia-viagens-backend:latest" >> $GITHUB_OUTPUT
 
+      # Conecta via SSH ao servidor e executa comandos de deploy
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -31,7 +39,8 @@ jobs:
             IMAGE="${{ steps.meta.outputs.IMAGE }}"
             echo "Using image: $IMAGE"
 
-            # Prepare env file on server
+            # Cria/atualiza arquivo de variáveis de ambiente no servidor
+            # OBS: adicione aqui outras variáveis como SWAGGER_ENABLED e CORS_ORIGIN se necessário
             sudo mkdir -p /opt/agencia
             sudo tee /opt/agencia/env > /dev/null << 'EOF'
 PORT=${{ secrets.PORT || 3000 }}
@@ -47,7 +56,11 @@ DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 DB_NAME=${{ secrets.DB_NAME }}
 EOF
 
-            # Deploy container
+            # Baixa a imagem do GHCR e recria o container
+            # Dica: se o pacote for privado, faça docker login ghcr.io antes
             sudo docker pull "$IMAGE"
             sudo docker rm -f agencia_viagens_api || true
-            sudo docker run -d --name agencia_viagens_api --restart=always --env-file /opt/agencia/env -p 3000:3000 "$IMAGE"
+            sudo docker run -d --name agencia_viagens_api --restart=always \
+              --env-file /opt/agencia/env \
+              -p 3000:3000 \
+              "$IMAGE"
