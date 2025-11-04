@@ -1,37 +1,49 @@
+# Workflow de CI/CD do Frontend (GitHub Pages)
+# Observação: Vercel é o provedor ativo; este fluxo fica manual
 name: Frontend CI/CD
 
+# Gatilho manual para evitar deploy duplicado com Vercel
 on:
-  # Desativado o gatilho automático de push para evitar deploy duplicado (usando Vercel)
+  # Desativado o gatilho automático de push
   workflow_dispatch:
 
+# Permissões necessárias para publicar no GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Evita execuções concorrentes de deploy para Pages
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
+  # Job de build: compila o frontend e cria artefato para Pages
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
+        # Executa comandos dentro de Frontend/
         working-directory: Frontend
     steps:
+      # Baixa o código
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Prepara Node e ativa cache de npm
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
+      # Instala dependências
       - name: Install
         run: npm ci
 
+      # Compila com Vite ajustando o base path para GitHub Pages
+      # VITE_API_BASE_URL deve vir dos Secrets em caso de uso de Pages
       - name: Build (Vite) with base path for Pages
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
@@ -40,11 +52,13 @@ jobs:
           echo "Building with API base: $VITE_API_BASE_URL"
           npm run build -- --base=/$REPO_NAME/
 
+      # Envia a pasta dist/ como artefato para o job de deploy
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: Frontend/dist
 
+  # Job de deploy: publica o artefato no GitHub Pages
   deploy:
     needs: build
     runs-on: ubuntu-latest
