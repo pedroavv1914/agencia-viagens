@@ -51,8 +51,12 @@ if (swaggerEnabled) {
 }
 
 // Healthcheck e raiz
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 app.get('/', (_req, res) => {
   res.send('Agencia Viagens API online');
