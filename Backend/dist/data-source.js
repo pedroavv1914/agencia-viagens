@@ -11,12 +11,14 @@ const TravelPackage_1 = require("./entity/TravelPackage");
 const User_1 = require("./entity/User");
 dotenv_1.default.config();
 function inferDatabaseUrl() {
-    const fromDatabaseUrl = process.env.DATABASE_URL;
+    const fromDatabaseUrl = process.env.DATABASE_URL?.trim();
     if (fromDatabaseUrl)
         return fromDatabaseUrl;
-    const fromDbHost = process.env.DB_HOST;
+    const fromDbHost = process.env.DB_HOST?.trim();
     if (!fromDbHost)
         return undefined;
+    if (fromDbHost.startsWith('postgres://') || fromDbHost.startsWith('postgresql://'))
+        return fromDbHost;
     try {
         const parsed = new URL(fromDbHost);
         if (parsed.protocol === 'postgres:' || parsed.protocol === 'postgresql:')
