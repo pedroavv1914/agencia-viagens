@@ -37,7 +37,7 @@ const AdminUsuarios: React.FC = () => {
     try {
       const updated = await updateUserRole(id, role, token);
       setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
-    } catch (err) {
+    } catch {
       alert('Erro ao atualizar role');
     } finally {
       setUpdatingId(null);
