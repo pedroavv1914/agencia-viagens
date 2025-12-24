@@ -26,11 +26,12 @@ export interface TravelPackage {
   tipo: 'nacional' | 'internacional';
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
+// normalize API base URL: remove trailing slashes to avoid double '//' in requests
+const rawApiBase = import.meta.env.VITE_API_BASE_URL;
+if (!rawApiBase) {
   throw new Error('VITE_API_BASE_URL não configurada!');
 }
+const API_BASE_URL = rawApiBase.replace(/\/+$/, '');
 
 function getAuthHeaders(token?: string) {
   const headers: Record<string, string> = {
