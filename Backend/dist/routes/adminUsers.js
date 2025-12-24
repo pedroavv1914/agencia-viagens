@@ -6,13 +6,13 @@ const User_1 = require("../entity/User");
 const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 const repo = () => data_source_1.AppDataSource.getRepository(User_1.User);
-// Lista usuários (somente admin)
-router.get('/', auth_1.requireAuth, auth_1.requireAdmin, async (_req, res) => {
+// Lista usuários (somente master)
+router.get('/', auth_1.requireAuth, auth_1.requireMaster, async (_req, res) => {
     const users = await repo().find({ select: { id: true, email: true, role: true } });
     return res.json(users);
 });
-// Atualiza role de um usuário (somente admin)
-router.patch('/:id/role', auth_1.requireAuth, auth_1.requireAdmin, async (req, res) => {
+// Atualiza role de um usuário (somente master)
+router.patch('/:id/role', auth_1.requireAuth, auth_1.requireMaster, async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const { role } = req.body;
     if (role !== 'admin' && role !== 'user') {
