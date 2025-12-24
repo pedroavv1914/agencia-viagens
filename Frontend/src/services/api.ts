@@ -41,8 +41,21 @@ function getAuthHeaders(token?: string) {
   return headers;
 }
 
+// Adicionado: fetchWithRetry para tratar 429 (Retry-After) com backoff exponencial
+async function fetchWithRetry(input: RequestInfo, init?: RequestInit, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(input, init);
+    if (res.status !== 429) return res;
+    if (attempt === retries) return res;
+    const retryAfter = res.headers.get('Retry-After');
+    const waitSeconds = retryAfter ? Math.max(1, parseInt(retryAfter, 10) || 1) : Math.min(2 ** attempt, 60);
+    await new Promise((r) => setTimeout(r, waitSeconds * 1000));
+  }
+  throw new Error('Falha após tentativas de retry');
+}
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ email, password }),
@@ -59,7 +72,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function register(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/register`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/auth/register`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({ email, password }),
@@ -77,7 +90,7 @@ export async function register(email: string, password: string): Promise<LoginRe
 
 export async function getPackages(tipo: 'nacional' | 'internacional', token?: string): Promise<TravelPackage[]> {
   const url = `${API_BASE_URL}/packages?tipo=${encodeURIComponent(tipo)}`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: getAuthHeaders(token),
   });
   if (!res.ok) throw new Error('Falha ao carregar pacotes');
@@ -85,7 +98,7 @@ export async function getPackages(tipo: 'nacional' | 'internacional', token?: st
 }
 
 export async function createPackage(pkg: TravelPackage, token: string): Promise<TravelPackage> {
-  const res = await fetch(`${API_BASE_URL}/packages`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/packages`, {
     method: 'POST',
     headers: getAuthHeaders(token),
     body: JSON.stringify(pkg),
@@ -95,7 +108,7 @@ export async function createPackage(pkg: TravelPackage, token: string): Promise<
 }
 
 export async function updatePackage(id: number, pkg: Partial<TravelPackage>, token: string): Promise<TravelPackage> {
-  const res = await fetch(`${API_BASE_URL}/packages/${id}`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/packages/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(token),
     body: JSON.stringify(pkg),
@@ -105,7 +118,7 @@ export async function updatePackage(id: number, pkg: Partial<TravelPackage>, tok
 }
 
 export async function deletePackage(id: number, token: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/packages/${id}`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/packages/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(token),
   });
@@ -113,7 +126,7 @@ export async function deletePackage(id: number, token: string): Promise<void> {
 }
 
 export async function getUserInfo(token: string): Promise<UserInfo> {
-  const res = await fetch(`${API_BASE_URL}/auth/me`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/auth/me`, {
     headers: getAuthHeaders(token),
   });
   if (!res.ok) throw new Error('Falha ao obter informações do usuário');
@@ -121,7 +134,7 @@ export async function getUserInfo(token: string): Promise<UserInfo> {
 }
 
 export async function refreshToken(token: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/auth/refresh`, {
     method: 'POST',
     headers: getAuthHeaders(token),
   });
@@ -131,7 +144,7 @@ export async function refreshToken(token: string): Promise<LoginResponse> {
 
 // Admin: listar usuários
 export async function getUsers(token: string): Promise<AdminUser[]> {
-  const res = await fetch(`${API_BASE_URL}/admin/users`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/admin/users`, {
     headers: getAuthHeaders(token),
   });
   if (!res.ok) throw new Error('Falha ao carregar usuários');
@@ -140,7 +153,7 @@ export async function getUsers(token: string): Promise<AdminUser[]> {
 
 // Admin: atualizar role de um usuário
 export async function updateUserRole(id: number, role: UserRole, token: string): Promise<AdminUser> {
-  const res = await fetch(`${API_BASE_URL}/admin/users/${id}/role`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/admin/users/${id}/role`, {
     method: 'PATCH',
     headers: getAuthHeaders(token),
     body: JSON.stringify({ role }),
@@ -159,7 +172,7 @@ export async function uploadPackageImage(file: File, token: string): Promise<str
   });
 
   const dataUrl = await toDataUrl(file);
-  const res = await fetch(`${API_BASE_URL}/packages/upload`, {
+  const res = await fetchWithRetry(`${API_BASE_URL}/packages/upload`, {
     method: 'POST',
     headers: getAuthHeaders(token),
     body: JSON.stringify({ filename: file.name, data: dataUrl }),
