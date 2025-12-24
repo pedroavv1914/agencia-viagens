@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.requireAuth = requireAuth;
 exports.requireAdmin = requireAdmin;
+exports.requireMaster = requireMaster;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt';
 function requireAuth(req, res, next) {
@@ -24,7 +25,16 @@ function requireAuth(req, res, next) {
 function requireAdmin(req, res, next) {
     if (!req.user)
         return res.status(401).json({ message: 'Não autenticado' });
-    if (req.user.role !== 'admin')
+    // Master também tem privilégios administrativos para pacotes
+    if (req.user.role !== 'admin' && req.user.role !== 'master') {
         return res.status(403).json({ message: 'Sem permissão' });
+    }
+    next();
+}
+function requireMaster(req, res, next) {
+    if (!req.user)
+        return res.status(401).json({ message: 'Não autenticado' });
+    if (req.user.role !== 'master')
+        return res.status(403).json({ message: 'Sem permissão (master necessário)' });
     next();
 }
