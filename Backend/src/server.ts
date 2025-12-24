@@ -28,9 +28,43 @@ app.use(cors({ origin: corsOrigin, allowedHeaders: ['Content-Type', 'Authorizati
 app.use(hpp());
 // Limitar tamanho de JSON recebido
 app.use(express.json({ limit: '1mb' }));
+
+// Configuração parametrizável do rate-limit (padrões seguros)
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000; // 15 min
+const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 100; // requisições por IP por window
+const RATE_LIMIT_WHITELIST = (process.env.RATE_LIMIT_WHITELIST || '') // CSV de IPs que não entram no rate-limit
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+// Função para extrair IP confiável (leva em conta X-Forwarded-For)
+function clientIp(req: any) {
+  const xf = (req.headers && (req.headers['x-forwarded-for'] || req.headers['x-forwarded'])) as string | undefined;
+  if (xf) return xf.split(',')[0].trim();
+  return req.ip || req.connection?.remoteAddress || 'unknown';
+}
+
+const apiLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX,
+  keyGenerator: (req) => clientIp(req),
+  // isenta health e permite whitelist por IP
+  skip: (req) => {
+    if (req.path === '/health') return true;
+    const ip = clientIp(req);
+    return RATE_LIMIT_WHITELIST.includes(ip);
+  },
+  handler: (req, res /*, next */) => {
+    const ip = clientIp(req);
+    const retryAfterSec = Math.ceil(RATE_LIMIT_WINDOW_MS / 1000);
+    // informa Retry-After e resposta JSON padrão; também loga origem
+    res.setHeader('Retry-After', String(retryAfterSec));
+    console.warn(`[rate-limit] 429 - ${req.method} ${req.originalUrl} - ip=${ip}`);
+    res.status(429).json({ message: 'Too many requests', retryAfter: retryAfterSec });
+  },
+});
 // Rate limit global moderado
-const globalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
-app.use(globalLimiter);
+app.use(apiLimiter);
 
 // Static: serve uploaded images
 const uploadsDir = path.resolve(process.cwd(), 'uploads');
@@ -52,10 +86,9 @@ if (swaggerEnabled) {
 
 // Healthcheck e raiz
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
+  res.status(200).json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
   });
 });
 app.get('/', (_req, res) => {
