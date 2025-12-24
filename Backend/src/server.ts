@@ -67,6 +67,23 @@ app.use('/auth', authRoutes);
 app.use('/packages', packageRoutes);
 app.use('/admin/users', adminUserRoutes);
 
+// Normaliza e valida DB_HOST antes da conexão com o DB
+(() => {
+  const rawHost = process.env.DB_HOST;
+  if (!rawHost) {
+    console.error('VARIÁVEL AUSENTE: DB_HOST não está definida. Configure as env vars do banco (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME).');
+    // não interrompe aqui para permitir que o processo mostre erro detalhado de conexão, mas log já ajuda
+  } else {
+    // Caso comum no Render: recebem apenas o id tipo "dpg-xxxx" — adiciona sufixo se necessário
+    const renderIdPattern = /^dpg-[a-z0-9-]+$/i;
+    if (renderIdPattern.test(rawHost) && !rawHost.includes('.')) {
+      const guessed = `${rawHost}.postgres.render.com`;
+      console.warn(`DB_HOST parece incompleto ('${rawHost}'). Ajustando automaticamente para '${guessed}'.`);
+      process.env.DB_HOST = guessed;
+    }
+  }
+})();
+
 const port = parseInt(process.env.PORT || '3000', 10);
 
 // Em produção, pula ensureDatabaseExists
@@ -80,6 +97,9 @@ const shouldEnsureDb = process.env.NODE_ENV !== 'production';
     });
   })
   .catch((err) => {
-    console.error('Erro ao iniciar API', err);
+    console.error('Erro ao iniciar API:', err && err.message ? err.message : err);
+    if (err && err.code === 'ENOTFOUND') {
+      console.error('ENOTFOUND: verifique DB_HOST/DB_PORT e se o hostname está correto (ex: nome.postgres.render.com).');
+    }
     process.exit(1);
   });
