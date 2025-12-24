@@ -62,11 +62,11 @@ exports.AppDataSource = new typeorm_1.DataSource({
                 : {}),
         }
         : {
-            host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
-            port: parseInt(process.env.DB_PORT || process.env.PGPORT || '5432', 10),
-            username: process.env.DB_USER || process.env.PGUSER || 'postgres',
-            password: process.env.DB_PASSWORD || process.env.PGPASSWORD || 'postgres',
-            database: process.env.DB_NAME || process.env.PGDATABASE || 'agencia_viagens',
+            host: process.env.PGHOST || process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.PGPORT || process.env.DB_PORT || '5432', 10),
+            username: process.env.PGUSER || process.env.DB_USER || 'postgres',
+            password: process.env.PGPASSWORD || process.env.DB_PASSWORD || 'postgres',
+            database: process.env.PGDATABASE || process.env.DB_NAME || 'agencia_viagens',
         }),
     synchronize: true,
     logging: false,
