@@ -1,0 +1,17 @@
+.git
+.github
+
+**/node_modules
+
+Backend/dist
+Frontend/.next
+Frontend/dist
+Frontend/node_modules
+
+**/.env
+**/.env.*
+
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
