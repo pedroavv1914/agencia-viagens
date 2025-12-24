@@ -5,7 +5,7 @@
     "watchPatterns": ["Backend/**"]
   },
   "deploy": {
-    "startCommand": "node Backend/dist/server.js",
+    "startCommand": "node dist/server.js",
     "healthcheckPath": "/health"
   }
 }
