@@ -104,6 +104,8 @@ app.use('/admin/users', adminUserRoutes);
 (() => {
   const databaseUrl = process.env.DATABASE_URL?.trim();
   if (databaseUrl) return;
+  const pgHost = process.env.PGHOST?.trim();
+  if (pgHost) return;
   const dbHostAsUrl = process.env.DB_HOST?.trim();
   if (dbHostAsUrl) {
     if (dbHostAsUrl.startsWith('postgres://') || dbHostAsUrl.startsWith('postgresql://')) return;
@@ -114,12 +116,14 @@ app.use('/admin/users', adminUserRoutes);
   }
 
   const rawHost = process.env.DB_HOST;
-  if (!rawHost) {
+  if (!rawHost && !process.env.PGHOST) {
     console.error(
-      'VARIÁVEL AUSENTE: configure DATABASE_URL (Railway) ou DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME.',
+      'VARIÁVEL AUSENTE: configure DATABASE_URL (Railway) ou PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE, ou DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME.',
     );
     // não interrompe aqui para permitir que o processo mostre erro detalhado de conexão, mas log já ajuda
-  } else {
+  }
+
+  if (rawHost) {
     // Caso comum no Render: recebem apenas o id tipo "dpg-xxxx" — adiciona sufixo se necessário
     const renderIdPattern = /^dpg-[a-z0-9-]+$/i;
     if (renderIdPattern.test(rawHost) && !rawHost.includes('.')) {
@@ -143,10 +147,34 @@ const shouldEnsureDb = process.env.NODE_ENV !== 'production';
     });
   })
   .catch((err) => {
-    const rawMsg = err && err.message ? String(err.message) : String(err);
-    const msg = rawMsg.replace(/(postgres(?:ql)?:\/\/)([^@\s]+)@/gi, '$1***@');
-    console.error('Erro ao iniciar API:', msg);
-    if (err && err.code === 'ENOTFOUND') {
+    const redact = (value: string) => value.replace(/(postgres(?:ql)?:\/\/)([^@\s]+)@/gi, '$1***@');
+    const safeMessage = redact(err && err.message ? String(err.message) : String(err));
+    const code = (err as any)?.code ? String((err as any).code) : undefined;
+    const nestedErrors = Array.isArray((err as any)?.errors)
+      ? (err as any).errors.map((e: any) => ({
+          code: e?.code ? String(e.code) : undefined,
+          errno: e?.errno,
+          syscall: e?.syscall,
+          address: e?.address,
+          port: e?.port,
+          message: e?.message ? redact(String(e.message)) : undefined,
+        }))
+      : undefined;
+
+    console.error(
+      'Erro ao iniciar API:',
+      JSON.stringify(
+        {
+          code,
+          message: safeMessage,
+          errors: nestedErrors,
+        },
+        null,
+        2,
+      ),
+    );
+
+    if (code === 'ENOTFOUND') {
       console.error('ENOTFOUND: verifique DB_HOST/DB_PORT e se o hostname está correto (ex: nome.postgres.render.com).');
     }
     process.exit(1);
