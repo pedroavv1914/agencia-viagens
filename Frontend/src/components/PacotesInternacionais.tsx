@@ -65,7 +65,7 @@ const PacotesInternacionais: React.FC = () => {
             setPacotes(normalized);
           }
         }
-      } catch (_) {
+      } catch {
         // mantém dados locais
       }
     }
