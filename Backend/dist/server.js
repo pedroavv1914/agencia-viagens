@@ -98,11 +98,23 @@ app.get('/', (_req, res) => {
 app.use('/auth', auth_1.default);
 app.use('/packages', packages_1.default);
 app.use('/admin/users', adminUsers_1.default);
-// Normaliza e valida DB_HOST antes da conexão com o DB
+// Normaliza e valida configuração de banco antes da conexão
 (() => {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl)
+        return;
+    const dbHostAsUrl = process.env.DB_HOST;
+    if (dbHostAsUrl) {
+        try {
+            const parsed = new URL(dbHostAsUrl);
+            if (parsed.protocol === 'postgres:' || parsed.protocol === 'postgresql:')
+                return;
+        }
+        catch { }
+    }
     const rawHost = process.env.DB_HOST;
     if (!rawHost) {
-        console.error('VARIÁVEL AUSENTE: DB_HOST não está definida. Configure as env vars do banco (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME).');
+        console.error('VARIÁVEL AUSENTE: configure DATABASE_URL (Railway) ou DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME.');
         // não interrompe aqui para permitir que o processo mostre erro detalhado de conexão, mas log já ajuda
     }
     else {

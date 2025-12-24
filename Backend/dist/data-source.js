@@ -10,7 +10,24 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const TravelPackage_1 = require("./entity/TravelPackage");
 const User_1 = require("./entity/User");
 dotenv_1.default.config();
-const databaseUrl = process.env.DATABASE_URL;
+function inferDatabaseUrl() {
+    const fromDatabaseUrl = process.env.DATABASE_URL;
+    if (fromDatabaseUrl)
+        return fromDatabaseUrl;
+    const fromDbHost = process.env.DB_HOST;
+    if (!fromDbHost)
+        return undefined;
+    try {
+        const parsed = new URL(fromDbHost);
+        if (parsed.protocol === 'postgres:' || parsed.protocol === 'postgresql:')
+            return fromDbHost;
+        return undefined;
+    }
+    catch {
+        return undefined;
+    }
+}
+const databaseUrl = inferDatabaseUrl();
 function shouldUseSsl(url) {
     if (process.env.DB_SSL === 'true')
         return true;
