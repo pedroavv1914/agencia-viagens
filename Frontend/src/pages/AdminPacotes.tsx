@@ -63,7 +63,7 @@ const AdminPacotes: React.FC = () => {
         data = await getPackages(tipoFilter, token);
       }
       setItems(data);
-    } catch (err) {
+    } catch {
       setError('Falha ao carregar pacotes');
     } finally {
       setLoading(false);
@@ -94,7 +94,7 @@ const AdminPacotes: React.FC = () => {
       setForm(emptyForm);
       await load();
       loadCounts();
-    } catch (err) {
+    } catch {
       alert('Erro ao criar pacote');
     }
   }
@@ -107,7 +107,7 @@ const AdminPacotes: React.FC = () => {
       setForm(emptyForm);
       await load();
       loadCounts();
-    } catch (err) {
+    } catch {
       alert('Erro ao atualizar pacote');
     }
   }
@@ -119,7 +119,7 @@ const AdminPacotes: React.FC = () => {
       await deletePackage(id, token);
       await load();
       loadCounts();
-    } catch (err) {
+    } catch {
       alert('Erro ao remover pacote');
     } finally {
       setDeleting(false);
@@ -150,7 +150,7 @@ const AdminPacotes: React.FC = () => {
       setUploading(true);
       const url = await uploadPackageImage(file, token);
       setForm({ ...form, imagem: url });
-    } catch (err) {
+    } catch {
       alert('Falha ao enviar imagem');
     } finally {
       setUploading(false);
