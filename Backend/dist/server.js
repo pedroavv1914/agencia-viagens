@@ -142,7 +142,9 @@ const shouldEnsureDb = process.env.NODE_ENV !== 'production';
     });
 })
     .catch((err) => {
-    console.error('Erro ao iniciar API:', err && err.message ? err.message : err);
+    const rawMsg = err && err.message ? String(err.message) : String(err);
+    const msg = rawMsg.replace(/(postgres(?:ql)?:\/\/)([^@\s]+)@/gi, '$1***@');
+    console.error('Erro ao iniciar API:', msg);
     if (err && err.code === 'ENOTFOUND') {
         console.error('ENOTFOUND: verifique DB_HOST/DB_PORT e se o hostname está correto (ex: nome.postgres.render.com).');
     }
