@@ -26,7 +26,11 @@ export interface TravelPackage {
   tipo: 'nacional' | 'internacional';
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  throw new Error('VITE_API_BASE_URL não configurada!');
+}
 
 function getAuthHeaders(token?: string) {
   const headers: Record<string, string> = {
