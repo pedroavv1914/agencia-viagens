@@ -100,11 +100,13 @@ app.use('/packages', packages_1.default);
 app.use('/admin/users', adminUsers_1.default);
 // Normaliza e valida configuração de banco antes da conexão
 (() => {
-    const databaseUrl = process.env.DATABASE_URL;
+    const databaseUrl = process.env.DATABASE_URL?.trim();
     if (databaseUrl)
         return;
-    const dbHostAsUrl = process.env.DB_HOST;
+    const dbHostAsUrl = process.env.DB_HOST?.trim();
     if (dbHostAsUrl) {
+        if (dbHostAsUrl.startsWith('postgres://') || dbHostAsUrl.startsWith('postgresql://'))
+            return;
         try {
             const parsed = new URL(dbHostAsUrl);
             if (parsed.protocol === 'postgres:' || parsed.protocol === 'postgresql:')
