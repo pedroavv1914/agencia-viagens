@@ -8,14 +8,16 @@ import { pacotesInternacionais as defaultsInternacionais } from '../components/P
 import { useAuth } from '../hooks/useAuth';
 
 export default function VerTodos() {
+  type Pacote = { nome: string; preco: string; descricao: string; imagem?: string };
+
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [pacoteSelecionado, setPacoteSelecionado] = React.useState<any>(null);
+  const [pacoteSelecionado, setPacoteSelecionado] = React.useState<Pacote | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useAuth();
 
-  const [nacionais, setNacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>(defaultsNacionais);
-  const [internacionais, setInternacionais] = React.useState<Array<{ nome: string; preco: string; descricao: string; imagem?: string }>>(defaultsInternacionais);
+  const [nacionais, setNacionais] = React.useState<Pacote[]>(defaultsNacionais);
+  const [internacionais, setInternacionais] = React.useState<Pacote[]>(defaultsInternacionais);
 
   // Determinar o filtro pela rota
   let mostrarNacionais = true;
@@ -66,7 +68,7 @@ export default function VerTodos() {
     return () => { active = false; };
   }, [location.pathname, token]);
 
-  function handleOpenModal(pacote: any) {
+  function handleOpenModal(pacote: Pacote) {
     setPacoteSelecionado(pacote);
     setModalOpen(true);
   }
@@ -93,7 +95,7 @@ export default function VerTodos() {
               justifyItems: 'center',
               marginBottom: '3.5rem',
             }}>
-              {nacionais.map((p: any) => (
+              {nacionais.map((p) => (
                 <div className="pacote-card" key={p.nome + (p.preco || '')} style={{ width: 260, minWidth: 220, maxWidth: 300 }}>
                   {p.imagem ? (
                     <img src={p.imagem} alt={p.nome} />
@@ -137,7 +139,7 @@ export default function VerTodos() {
               gap: '2rem',
               justifyItems: 'center',
             }}>
-              {internacionais.map((p: any) => (
+              {internacionais.map((p) => (
                 <div className="pacote-card" key={p.nome + (p.preco || '')} style={{ width: 260, minWidth: 220, maxWidth: 300 }}>
                   {p.imagem ? (
                     <img src={p.imagem} alt={p.nome} />
@@ -169,4 +171,3 @@ export default function VerTodos() {
     </section>
   );
 }
-
