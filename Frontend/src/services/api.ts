@@ -65,7 +65,9 @@ export async function login(email: string, password: string): Promise<LoginRespo
     try {
       const err = await res.json();
       if (err && typeof err.message === 'string') message = err.message;
-    } catch {}
+    } catch (e) {
+      void e;
+    }
     throw new Error(message);
   }
   return res.json();
@@ -82,7 +84,9 @@ export async function register(email: string, password: string): Promise<LoginRe
     try {
       const err = await res.json();
       if (err && typeof err.message === 'string') message = err.message;
-    } catch {}
+    } catch (e) {
+      void e;
+    }
     throw new Error(message);
   }
   return res.json();
