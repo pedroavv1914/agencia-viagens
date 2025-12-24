@@ -10,18 +10,45 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const TravelPackage_1 = require("./entity/TravelPackage");
 const User_1 = require("./entity/User");
 dotenv_1.default.config();
-const host = process.env.DB_HOST || 'localhost';
-const port = parseInt(process.env.DB_PORT || '5432', 10);
-const username = process.env.DB_USER || 'postgres';
-const password = process.env.DB_PASSWORD || 'postgres';
-const database = process.env.DB_NAME || 'agencia_viagens';
+const databaseUrl = process.env.DATABASE_URL;
+function shouldUseSsl(url) {
+    if (process.env.DB_SSL === 'true')
+        return true;
+    if (process.env.DB_SSL === 'false')
+        return false;
+    try {
+        const parsed = new URL(url);
+        const sslmode = parsed.searchParams.get('sslmode');
+        const ssl = parsed.searchParams.get('ssl');
+        if (sslmode && sslmode !== 'disable')
+            return true;
+        if (ssl === 'true' || ssl === '1')
+            return true;
+        return false;
+    }
+    catch {
+        return false;
+    }
+}
 exports.AppDataSource = new typeorm_1.DataSource({
     type: 'postgres',
-    host,
-    port,
-    username,
-    password,
-    database,
+    ...(databaseUrl
+        ? {
+            url: databaseUrl,
+            ...(shouldUseSsl(databaseUrl)
+                ? {
+                    ssl: { rejectUnauthorized: false },
+                    extra: { ssl: { rejectUnauthorized: false } },
+                }
+                : {}),
+        }
+        : {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT || '5432', 10),
+            username: process.env.DB_USER || 'postgres',
+            password: process.env.DB_PASSWORD || 'postgres',
+            database: process.env.DB_NAME || 'agencia_viagens',
+        }),
     synchronize: true,
     logging: false,
     entities: [TravelPackage_1.TravelPackage, User_1.User],
