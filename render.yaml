@@ -4,12 +4,13 @@ databases:
 
 services:
   - type: web
-    name: agencia-viagens-api
+    name: agencia-viagens-backend
     env: node
     plan: free
     buildCommand: cd Backend && npm ci && npm run build
     startCommand: cd Backend && node dist/server.js
     healthCheckPath: /health
+    healthCheckInterval: 300
     autoDeploy: true
     envVars:
       - key: DB_HOST
