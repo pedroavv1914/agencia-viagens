@@ -10,6 +10,7 @@ COPY Backend/src ./Backend/src
 
 RUN cd Backend && npm run build
 
-EXPOSE 3000
-CMD ["node", "Backend/dist/server.js"]
+WORKDIR /app/Backend
 
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
