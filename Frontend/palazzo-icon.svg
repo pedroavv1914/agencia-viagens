@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="palazzoGradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A5CFF"/>
+      <stop offset="100%" stop-color="#00C2FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo -->
+  <rect width="128" height="128" rx="24" fill="url(#palazzoGradient)"/>
+
+  <!-- Letra P -->
+  <path
+    d="M46 32H72C87 32 96 41 96 54C96 67 87 76 72 76H58V96H46V32ZM58 44V64H70C78 64 84 60 84 54C84 48 78 44 70 44H58Z"
+    fill="#FFFFFF"
+  />
+</svg>
